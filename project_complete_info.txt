@@ -1,0 +1,698 @@
+================================================================================
+THÔNG TIN DỰ ÁN HOÀN CHỈNH
+================================================================================
+Thời gian tạo: 2025-10-18 19:41:32
+Thư mục gốc: d:\Atino\extension\project-loan-tracker
+================================================================================
+
+📁 CẤU TRÚC THU MỤC
+--------------------------------------------------
+├── 📁 src/
+│   ├── 📁 core/
+│   │   ├── 📄 app.py
+│   │   └── 📄 config.py
+│   ├── 📁 routes/
+│   │   ├── 📄 disbursement_plans.py
+│   │   ├── 📄 disbursements.py
+│   │   ├── 📄 invoices.py
+│   │   ├── 📄 pages.py
+│   │   └── 📄 suppliers.py
+│   ├── 📁 schemas/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 disbursement.py
+│   │   ├── 📄 disbursement_plan.py
+│   │   ├── 📄 invoice.py
+│   │   └── 📄 supplier.py
+│   ├── 📁 services/
+│   │   ├── 📁 database/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 disbursement.py
+│   │   │   ├── 📄 disbursement_plan.py
+│   │   │   ├── 📄 invoice.py
+│   │   │   └── 📄 supplier.py
+│   │   ├── 📄 invoice_service.py
+│   │   └── 📄 supplier_service.py
+│   └── 📄 plan_service.py
+├── 📁 static/
+│   ├── 📁 css/
+│   │   └── 📄 style.css
+│   └── 📁 js/
+│       └── 📄 main.js
+├── 📁 templates/
+│   ├── 📄 base.html
+│   └── 📄 home.html
+├── 📄 Get detail code.ipynb
+├── 📄 main.py
+├── 📄 project_complete_info.txt
+├── 📄 README.md
+└── 📄 requirements.txt
+
+
+📄 DANH SÁCH TẤT CẢ FILE
+--------------------------------------------------
+Get detail code.ipynb (9476 bytes)
+main.py (151 bytes)
+project_complete_info.txt (0 bytes)
+README.md (1692 bytes)
+requirements.txt (63 bytes)
+src\core\app.py (1152 bytes)
+src\core\config.py (194 bytes)
+src\plan_service.py (138 bytes)
+src\routes\disbursement_plans.py (476 bytes)
+src\routes\disbursements.py (665 bytes)
+src\routes\invoices.py (751 bytes)
+src\routes\pages.py (415 bytes)
+src\routes\suppliers.py (619 bytes)
+src\schemas\__init__.py (0 bytes)
+src\schemas\disbursement.py (811 bytes)
+src\schemas\disbursement_plan.py (309 bytes)
+src\schemas\invoice.py (516 bytes)
+src\schemas\supplier.py (272 bytes)
+src\services\database\__init__.py (343 bytes)
+src\services\database\disbursement.py (460 bytes)
+src\services\database\disbursement_plan.py (191 bytes)
+src\services\database\invoice.py (524 bytes)
+src\services\database\supplier.py (393 bytes)
+src\services\invoice_service.py (341 bytes)
+src\services\supplier_service.py (284 bytes)
+static\css\style.css (664 bytes)
+static\js\main.js (4689 bytes)
+templates\base.html (553 bytes)
+templates\home.html (787 bytes)
+
+Tổng cộng: 29 file
+
+💻 NỘI DUNG TẤT CẢ FILE CODE
+================================================================================
+
+============================================================
+FILE: main.py
+============================================================
+import uvicorn
+from src.core.app import app
+
+if __name__ == "__main__":
+    uvicorn.run("src.core.app:app", host="0.0.0.0", port=8000, reload=True)
+============================================================
+
+============================================================
+FILE: project_complete_info.txt
+============================================================
+
+============================================================
+
+============================================================
+FILE: README.md
+============================================================
+-- Bảng 1: Nhà Cung Cấp
+CREATE TABLE suppliers (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name TEXT NOT NULL,
+    contact_info TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Bảng 2: Kế Hoạch Giải Ngân
+CREATE TABLE disbursement_plans (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Bảng 3: Hóa Đơn (liên kết với Kế hoạch)
+CREATE TABLE invoices (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    plan_id BIGINT REFERENCES disbursement_plans(id) ON DELETE CASCADE,
+    supplier_id BIGINT REFERENCES suppliers(id) ON DELETE SET NULL,
+    invoice_number TEXT NOT NULL,
+    issue_date DATE NOT NULL,
+    total_value NUMERIC(15, 2) NOT NULL,
+    status TEXT DEFAULT 'Chưa thanh toán',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Bảng 4: Các Lần Giải Ngân (liên kết với Kế hoạch)
+-- THAY ĐỔI QUAN TRỌNG: Liên kết trực tiếp với plan_id
+CREATE TABLE disbursements (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    plan_id BIGINT REFERENCES disbursement_plans(id) ON DELETE CASCADE,
+    
+    -- Kế hoạch và thực tế
+    planned_date DATE,
+    planned_amount NUMERIC(15, 2),
+    actual_date DATE,
+    actual_amount NUMERIC(15, 2),
+
+    -- Thông tin tài chính & khế ước
+    bank_name TEXT,
+    loan_contract_number TEXT,
+    loan_term_months INT,
+    loan_interest_rate REAL,
+    interest_amount NUMERIC(15, 2),
+    interest_due_date DATE,
+    principal_due_date DATE,
+    
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+
+============================================================
+
+============================================================
+FILE: requirements.txt
+============================================================
+fastapi
+uvicorn[standard]
+pydantic-settings
+supabase
+jinja2
+============================================================
+
+============================================================
+FILE: src\core\app.py
+============================================================
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pathlib import Path
+
+# Import routers
+from src.routes import suppliers, invoices, pages, disbursement_plans, disbursements
+
+app = FastAPI(title="Project Loan Tracker")
+
+# Xác định đường dẫn thư mục gốc
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# 1. Mount thư mục static
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+# 2. Cấu hình Jinja2Templates
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
+
+# 3. Gắn các API Routers (thêm các router còn thiếu)
+app.include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Suppliers"])
+app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"])
+app.include_router(disbursement_plans.router, prefix="/api/v1/plans", tags=["Disbursement Plans"])
+app.include_router(disbursements.router, prefix="/api/v1/disbursements", tags=["Disbursements"])
+
+
+# 4. Gắn Page Router (phục vụ HTML)
+app.include_router(pages.router, tags=["Web Pages"])
+============================================================
+
+============================================================
+FILE: src\core\config.py
+============================================================
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
+
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
+============================================================
+
+============================================================
+FILE: src\plan_service.py
+============================================================
+from src.services.database import disbursement_plan as plan_db
+
+def get_all_plans():
+    return plan_db.db_get_all_disbursement_plans()
+============================================================
+
+============================================================
+FILE: src\routes\disbursement_plans.py
+============================================================
+from fastapi import APIRouter
+from typing import List
+from src.schemas.disbursement_plan import DisbursementPlanResponse
+import src.plan_service as plan_service
+
+router = APIRouter()
+
+@router.get("", response_model=List[DisbursementPlanResponse])
+def get_all_disbursement_plans():
+    """
+    API endpoint để lấy tất cả các kế hoạch giải ngân.
+    Đây là API mà main.js sẽ gọi đầu tiên.
+    """
+    return plan_service.get_all_plans()
+============================================================
+
+============================================================
+FILE: src\routes\disbursements.py
+============================================================
+from fastapi import APIRouter
+from typing import List
+from src.schemas.disbursement import DisbursementResponse, DisbursementCreate
+from src.services.database import disbursement as disbursement_db
+
+router = APIRouter()
+
+# THAY ĐỔI: Endpoint lấy theo plan_id
+@router.get("/plan/{plan_id}", response_model=List[DisbursementResponse])
+def get_disbursements_for_plan(plan_id: int):
+    return disbursement_db.db_get_disbursements_by_plan_id(plan_id)
+
+@router.post("/", response_model=DisbursementResponse, status_code=201)
+def create_new_disbursement(disbursement: DisbursementCreate):
+    return disbursement_db.db_create_disbursement(disbursement)
+============================================================
+
+============================================================
+FILE: src\routes\invoices.py
+============================================================
+from fastapi import APIRouter, HTTPException
+from typing import List
+from src.schemas.invoice import InvoiceCreate, InvoiceResponse, InvoiceWithSupplierResponse
+from src.services import invoice_service
+
+router = APIRouter()
+
+@router.post("/", response_model=InvoiceResponse, status_code=201)
+def create_new_invoice(invoice: InvoiceCreate):
+    try:
+        return invoice_service.create_invoice(invoice)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Sửa lại endpoint này để khớp với frontend
+@router.get("/plan/{plan_id}", response_model=List[InvoiceWithSupplierResponse])
+def read_invoices_for_plan(plan_id: int):
+    return invoice_service.get_all_invoices_by_plan_id(plan_id)
+============================================================
+
+============================================================
+FILE: src\routes\pages.py
+============================================================
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse
+from src.core.app import templates
+
+router = APIRouter()
+
+@router.get("/", response_class=HTMLResponse)
+async def home_page(request: Request):
+    return templates.TemplateResponse(
+        "home.html",
+        {
+            "request": request,
+            "title": "Trang chủ - Quản lý Hóa đơn"
+        }
+    )
+============================================================
+
+============================================================
+FILE: src\routes\suppliers.py
+============================================================
+from fastapi import APIRouter, HTTPException
+from typing import List
+from src.schemas.supplier import SupplierCreate, SupplierResponse
+from src.services import supplier_service
+
+router = APIRouter()
+
+@router.post("/", response_model=SupplierResponse, status_code=201)
+def create_new_supplier(supplier: SupplierCreate):
+    try:
+        return supplier_service.create_supplier(supplier)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/", response_model=List[SupplierResponse])
+def read_all_suppliers():
+    return supplier_service.get_all_suppliers()
+============================================================
+
+============================================================
+FILE: src\schemas\__init__.py
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\schemas\disbursement.py
+============================================================
+from pydantic import BaseModel, Field
+from datetime import date
+
+class DisbursementBase(BaseModel):
+    plan_id: int
+    planned_date: date | None = None
+    planned_amount: float | None = Field(None, gt=0)
+    actual_date: date | None = None
+    actual_amount: float | None = Field(None, gt=0)
+    bank_name: str | None = None
+    loan_contract_number: str | None = None
+    loan_term_months: int | None = Field(None, gt=0)
+    loan_interest_rate: float | None = Field(None, ge=0, le=1)
+    interest_amount: float | None = Field(None, ge=0)
+    interest_due_date: date | None = None
+    principal_due_date: date | None = None
+
+class DisbursementCreate(DisbursementBase):
+    pass
+
+class DisbursementResponse(DisbursementBase):
+    id: int
+    class Config:
+        from_attributes = True
+============================================================
+
+============================================================
+FILE: src\schemas\disbursement_plan.py
+============================================================
+from pydantic import BaseModel
+
+class DisbursementPlanBase(BaseModel):
+    name: str
+    description: str | None = None
+
+class DisbursementPlanCreate(DisbursementPlanBase):
+    pass
+
+class DisbursementPlanResponse(DisbursementPlanBase):
+    id: int
+    class Config:
+        from_attributes = True
+============================================================
+
+============================================================
+FILE: src\schemas\invoice.py
+============================================================
+from pydantic import BaseModel
+from datetime import date
+from .supplier import SupplierResponse
+
+class InvoiceBase(BaseModel):
+    invoice_number: str
+    issue_date: date
+    total_value: float
+    supplier_id: int
+    status: str = "Chưa thanh toán"
+
+class InvoiceCreate(InvoiceBase):
+    pass
+
+class InvoiceResponse(InvoiceBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+class InvoiceWithSupplierResponse(InvoiceResponse):
+    suppliers: SupplierResponse | None = None
+============================================================
+
+============================================================
+FILE: src\schemas\supplier.py
+============================================================
+from pydantic import BaseModel
+
+class SupplierBase(BaseModel):
+    name: str
+    contact_info: str | None = None
+
+class SupplierCreate(SupplierBase):
+    pass
+
+class SupplierResponse(SupplierBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+============================================================
+
+============================================================
+FILE: src\services\database\__init__.py
+============================================================
+import os
+from supabase import create_client, Client
+from src.core.config import settings
+
+# Lấy thông tin từ settings đã cấu hình
+url: str = settings.SUPABASE_URL
+key: str = settings.SUPABASE_KEY
+
+# Khởi tạo client để các file khác có thể import và sử dụng
+supabase_client: Client = create_client(url, key)
+============================================================
+
+============================================================
+FILE: src\services\database\disbursement.py
+============================================================
+from . import supabase_client
+from src.schemas.disbursement import DisbursementCreate
+
+def db_create_disbursement(disbursement: DisbursementCreate):
+    res = supabase_client.table("disbursements").insert(disbursement.model_dump()).execute()
+    return res.data[0]
+
+def db_get_disbursements_by_plan_id(plan_id: int):
+    res = supabase_client.table("disbursements").select("*").eq("plan_id", plan_id).order("actual_date").execute()
+    return res.data
+============================================================
+
+============================================================
+FILE: src\services\database\disbursement_plan.py
+============================================================
+from . import supabase_client
+
+def db_get_all_disbursement_plans():
+    response = supabase_client.table("disbursement_plans").select("*").order("name").execute()
+    return response.data
+============================================================
+
+============================================================
+FILE: src\services\database\invoice.py
+============================================================
+from . import supabase_client
+from src.schemas.invoice import InvoiceCreate
+
+def db_create_invoice(invoice: InvoiceCreate):
+    response = supabase_client.table("invoices").insert(invoice.model_dump()).execute()
+    return response.data[0]
+
+def db_get_all_invoices_by_plan_id(plan_id: int):
+    # Sửa lại hàm này để lọc theo plan_id
+    response = supabase_client.table("invoices").select("*, suppliers(id, name)").eq("plan_id", plan_id).order("issue_date", desc=True).execute()
+    return response.data
+============================================================
+
+============================================================
+FILE: src\services\database\supplier.py
+============================================================
+from . import supabase_client
+from src.schemas.supplier import SupplierCreate
+
+def db_create_supplier(supplier: SupplierCreate):
+    response = supabase_client.table("suppliers").insert(supplier.model_dump()).execute()
+    return response.data[0]
+
+def db_get_all_suppliers():
+    response = supabase_client.table("suppliers").select("*").order("id").execute()
+    return response.data
+============================================================
+
+============================================================
+FILE: src\services\invoice_service.py
+============================================================
+from src.services.database import invoice as invoice_db
+from src.schemas.invoice import InvoiceCreate
+
+def create_invoice(invoice: InvoiceCreate):
+    return invoice_db.db_create_invoice(invoice)
+
+def get_all_invoices_by_plan_id(plan_id: int):
+    # Sửa lại hàm này
+    return invoice_db.db_get_all_invoices_by_plan_id(plan_id)
+============================================================
+
+============================================================
+FILE: src\services\supplier_service.py
+============================================================
+from src.services.database import supplier as supplier_db
+from src.schemas.supplier import SupplierCreate
+
+def create_supplier(supplier: SupplierCreate):
+    return supplier_db.db_create_supplier(supplier)
+
+def get_all_suppliers():
+    return supplier_db.db_get_all_suppliers()
+============================================================
+
+============================================================
+FILE: static\css\style.css
+============================================================
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    text-align: center;
+    color: #4a4a4a;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+============================================================
+
+============================================================
+FILE: static\js\main.js
+============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const plansContainer = document.getElementById('plans-container');
+    const detailsSection = document.getElementById('details-section');
+    const invoicesContainer = document.getElementById('invoices-container');
+    const disbursementsContainer = document.getElementById('disbursements-container');
+    const planNameSpan = document.getElementById('plan-name');
+    
+    const formatCurrency = (value) => value != null ? new Intl.NumberFormat('vi-VN').format(value) : 'N/A';
+    const formatDate = (value) => value ? new Date(value).toLocaleDateString('vi-VN') : 'N/A';
+
+    // 1. Hiển thị danh sách các Kế hoạch
+    async function displayPlans() {
+        try {
+            const response = await fetch('/api/v1/plans');
+            const plans = await response.json();
+            let html = '<ul>';
+            plans.forEach(plan => {
+                html += `<li><a href="#" class="plan-link" data-id="${plan.id}" data-name="${plan.name}">${plan.name}</a></li>`;
+            });
+            html += '</ul>';
+            plansContainer.innerHTML = html;
+
+            document.querySelectorAll('.plan-link').forEach(link => {
+                link.addEventListener('click', handlePlanClick);
+            });
+        } catch (error) {
+            plansContainer.innerHTML = '<p style="color:red;">Lỗi tải danh sách kế hoạch.</p>';
+        }
+    }
+
+    // 2. Xử lý khi click vào một Kế hoạch
+    async function handlePlanClick(event) {
+        event.preventDefault();
+        const planId = event.target.dataset.id;
+        const planName = event.target.dataset.name;
+        
+        planNameSpan.textContent = planName;
+        detailsSection.style.display = 'block';
+        invoicesContainer.innerHTML = '<p>Đang tải hóa đơn...</p>';
+        disbursementsContainer.innerHTML = '<p>Đang tải chi tiết giải ngân...</p>';
+        
+        // Gọi cả hai hàm để tải dữ liệu song song
+        await Promise.all([
+            displayInvoices(planId),
+            displayDisbursements(planId)
+        ]);
+    }
+
+    // 3. Hiển thị Hóa đơn cho một Kế hoạch
+    async function displayInvoices(planId) {
+        const response = await fetch(`/api/v1/invoices/plan/${planId}`);
+        const invoices = await response.json();
+
+        if (invoices.length === 0) {
+            invoicesContainer.innerHTML = '<p>Kế hoạch này chưa có hóa đơn.</p>';
+            return;
+        }
+
+        let table = `<table><thead><tr><th>Số HĐ</th><th>Ngày HĐ</th><th>NCC</th><th>Giá trị</th><th>Trạng thái</th></tr></thead><tbody>`;
+        invoices.forEach(inv => {
+            table += `<tr>
+                <td>${inv.invoice_number}</td>
+                <td>${formatDate(inv.issue_date)}</td>
+                <td>${inv.suppliers ? inv.suppliers.name : 'N/A'}</td>
+                <td>${formatCurrency(inv.total_value)}</td>
+                <td>${inv.status}</td>
+            </tr>`;
+        });
+        table += '</tbody></table>';
+        invoicesContainer.innerHTML = table;
+    }
+
+    // 4. Hiển thị các Lần Giải ngân cho một Kế hoạch
+    async function displayDisbursements(planId) {
+        const response = await fetch(`/api/v1/disbursements/plan/${planId}`);
+        const disbursements = await response.json();
+
+        if (disbursements.length === 0) {
+            disbursementsContainer.innerHTML = '<p>Kế hoạch này chưa có lần giải ngân nào.</p>';
+            return;
+        }
+        
+        let cumulativeAmount = 0;
+        let table = `<table><thead><tr>
+            <th>Ngày GN thực tế</th><th>Giá trị GN</th><th>Lũy kế</th><th>Ngân hàng</th><th>Số khế ước</th><th>Lãi suất</th><th>Ngày đáo hạn</th>
+        </tr></thead><tbody>`;
+
+        disbursements.forEach(d => {
+            cumulativeAmount += d.actual_amount || 0;
+            table += `<tr>
+                <td>${formatDate(d.actual_date)}</td>
+                <td>${formatCurrency(d.actual_amount)}</td>
+                <td>${formatCurrency(cumulativeAmount)}</td>
+                <td>${d.bank_name || 'N/A'}</td>
+                <td>${d.loan_contract_number || 'N/A'}</td>
+                <td>${d.loan_interest_rate ? (d.loan_interest_rate * 100).toFixed(2) + '%' : 'N/A'}</td>
+                <td>${formatDate(d.principal_due_date)}</td>
+            </tr>`;
+        });
+        table += '</tbody></table>';
+        disbursementsContainer.innerHTML = table;
+    }
+
+    // Bắt đầu chạy
+    displayPlans();
+});
+============================================================
+
+
+📊 THỐNG KÊ
+------------------------------
+Tổng số file: 29
+File code: 26
+Các loại file code:
+  .css: 1 file
+  .js: 1 file
+  .md: 1 file
+  .py: 21 file
+  .txt: 2 file

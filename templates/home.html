@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+    <h2>Danh sách Kế hoạch Giải ngân</h2>
+    <div id="plans-container">
+        <p>Đang tải dữ liệu...</p>
+    </div>
+</section>
+
+<!-- Vùng hiển thị chi tiết khi một kế hoạch được chọn -->
+<section id="details-section" style="display:none;">
+    <h2 id="plan-title">Chi tiết cho Kế hoạch: <span id="plan-name"></span></h2>
+    
+    <hr>
+    <h3>Danh sách Hóa đơn liên quan</h3>
+    <div id="invoices-container"></div>
+    
+    <hr>
+    <h3>Danh sách các Lần Giải ngân</h3>
+    <div id="disbursements-container"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+{% endblock %}
