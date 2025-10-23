@@ -1,20 +1,57 @@
+<!-- FILE: templates/base.html (THAY THẾ TOÀN BỘ) -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Quản lý Hóa đơn và Giải ngân</h1>
-        </header>
-        <main>
-            {% block content %}{% endblock %}
-        </main>
+    <header class="app-bar">
+        <div class="app-bar-title">Project Loan Tracker</div>
+        <nav class="navbar">
+            <button id="nav-plans" class="nav-btn active">
+                <span class="material-icons">assignment</span>
+                Quản lý Kế hoạch
+            </button>
+            <button id="nav-suppliers" class="nav-btn">
+                <span class="material-icons">business</span>
+                Quản lý Nhà Cung Cấp
+            </button>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Modal cho việc Thêm/Sửa -->
+    <div id="entity-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button id="close-modal-btn" class="icon-btn">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="entity-form">
+                    <!-- Các trường input sẽ được JS chèn vào đây -->
+                </form>
+            </div>
+            <div class="modal-footer" style="text-align: right;">
+                <button type="submit" form="entity-form" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
     </div>
-    {% block scripts %}{% endblock %}
+
+    <script type="module" src="/static/js/main.js"></script>
 </body>
 </html>

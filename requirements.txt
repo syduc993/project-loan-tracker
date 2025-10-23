@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
 pydantic-settings
-requests
 jinja2
+sqlalchemy[asyncio]>=2.0
+asyncpg

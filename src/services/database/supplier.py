@@ -1,29 +1,35 @@
-from . import larkbase_client
-from src.schemas.supplier import SupplierCreate
-from src.core.config import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from .schema import Supplier
+from src.schemas.supplier import SupplierCreate, SupplierUpdate
 
-def db_create_supplier(supplier: SupplierCreate):
-    fields = {
-        "name": supplier.name,
-        "contact_info": supplier.contact_info or ""
-    }
-    record = larkbase_client.create_record(settings.SUPPLIERS_TABLE_ID, fields)
-    return {
-        "id": record["record_id"],
-        "name": record["fields"]["name"],
-        "contact_info": record["fields"].get("contact_info", "")
-    }
+async def db_create_supplier(db: AsyncSession, supplier: SupplierCreate):
+    new_supplier = Supplier(**supplier.model_dump())
+    db.add(new_supplier)
+    await db.flush()
+    await db.refresh(new_supplier)
+    return new_supplier
 
-def db_get_all_suppliers():
-    records = larkbase_client.get_records(
-        settings.SUPPLIERS_TABLE_ID,
-        sort=[{"field_name": "name", "desc": False}]
-    )
-    return [
-        {
-            "id": r["record_id"],
-            "name": r["fields"]["name"],
-            "contact_info": r["fields"].get("contact_info", "")
-        }
-        for r in records
-    ]
+async def db_get_all_suppliers(db: AsyncSession):
+    result = await db.execute(select(Supplier).order_by(Supplier.id))
+    return result.scalars().all()
+
+async def db_get_supplier_by_id(db: AsyncSession, supplier_id: int) -> Supplier | None:
+    """Lấy một nhà cung cấp theo ID."""
+    result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
+    return result.scalars().first()
+
+async def db_update_supplier(db: AsyncSession, db_supplier: Supplier, supplier_in: SupplierUpdate) -> Supplier:
+    """Cập nhật thông tin nhà cung cấp."""
+    update_data = supplier_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_supplier, key, value)
+    
+    await db.flush()
+    await db.refresh(db_supplier)
+    return db_supplier
+
+async def db_delete_supplier(db: AsyncSession, db_supplier: Supplier):
+    """Xóa một nhà cung cấp."""
+    await db.delete(db_supplier)
+    await db.flush()

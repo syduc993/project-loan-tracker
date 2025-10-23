@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-10-18 19:41:32
+Thời gian tạo: 2025-10-23 13:56:17
 Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ================================================================================
 
@@ -10,7 +10,8 @@ Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ├── 📁 src/
 │   ├── 📁 core/
 │   │   ├── 📄 app.py
-│   │   └── 📄 config.py
+│   │   ├── 📄 config.py
+│   │   └── 📄 templating.py
 │   ├── 📁 routes/
 │   │   ├── 📄 disbursement_plans.py
 │   │   ├── 📄 disbursements.py
@@ -24,20 +25,28 @@ Thư mục gốc: d:\Atino\extension\project-loan-tracker
 │   │   ├── 📄 invoice.py
 │   │   └── 📄 supplier.py
 │   ├── 📁 services/
-│   │   ├── 📁 database/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 disbursement.py
-│   │   │   ├── 📄 disbursement_plan.py
-│   │   │   ├── 📄 invoice.py
-│   │   │   └── 📄 supplier.py
-│   │   ├── 📄 invoice_service.py
-│   │   └── 📄 supplier_service.py
-│   └── 📄 plan_service.py
+│   │   └── 📁 database/
+│   │       ├── 📄 base.py
+│   │       ├── 📄 disbursement.py
+│   │       ├── 📄 disbursement_plan.py
+│   │       ├── 📄 invoice.py
+│   │       ├── 📄 schema.py
+│   │       └── 📄 supplier.py
+│   └── 📁 utils/
+│       └── 📄 interest_calculator.py
 ├── 📁 static/
 │   ├── 📁 css/
 │   │   └── 📄 style.css
 │   └── 📁 js/
-│       └── 📄 main.js
+│       ├── 📁 ui/
+│       │   ├── 📄 common.js
+│       │   ├── 📄 disbursementUI.js
+│       │   ├── 📄 invoiceUI.js
+│       │   ├── 📄 planUI.js
+│       │   └── 📄 supplierUI.js
+│       ├── 📄 api.js
+│       ├── 📄 main.js
+│       └── 📄 state.js
 ├── 📁 templates/
 │   ├── 📄 base.html
 │   └── 📄 home.html
@@ -54,33 +63,40 @@ Get detail code.ipynb (9476 bytes)
 main.py (151 bytes)
 project_complete_info.txt (0 bytes)
 README.md (1692 bytes)
-requirements.txt (63 bytes)
-src\core\app.py (1152 bytes)
-src\core\config.py (194 bytes)
-src\plan_service.py (138 bytes)
-src\routes\disbursement_plans.py (476 bytes)
-src\routes\disbursements.py (665 bytes)
-src\routes\invoices.py (751 bytes)
-src\routes\pages.py (415 bytes)
-src\routes\suppliers.py (619 bytes)
+requirements.txt (88 bytes)
+src\core\app.py (1146 bytes)
+src\core\config.py (210 bytes)
+src\core\templating.py (347 bytes)
+src\routes\disbursement_plans.py (3333 bytes)
+src\routes\disbursements.py (2610 bytes)
+src\routes\invoices.py (2698 bytes)
+src\routes\pages.py (556 bytes)
+src\routes\suppliers.py (2489 bytes)
 src\schemas\__init__.py (0 bytes)
-src\schemas\disbursement.py (811 bytes)
-src\schemas\disbursement_plan.py (309 bytes)
-src\schemas\invoice.py (516 bytes)
-src\schemas\supplier.py (272 bytes)
-src\services\database\__init__.py (343 bytes)
-src\services\database\disbursement.py (460 bytes)
-src\services\database\disbursement_plan.py (191 bytes)
-src\services\database\invoice.py (524 bytes)
-src\services\database\supplier.py (393 bytes)
-src\services\invoice_service.py (341 bytes)
-src\services\supplier_service.py (284 bytes)
-static\css\style.css (664 bytes)
-static\js\main.js (4689 bytes)
-templates\base.html (553 bytes)
-templates\home.html (787 bytes)
+src\schemas\disbursement.py (1989 bytes)
+src\schemas\disbursement_plan.py (668 bytes)
+src\schemas\invoice.py (2150 bytes)
+src\schemas\supplier.py (374 bytes)
+src\services\database\base.py (1820 bytes)
+src\services\database\disbursement.py (7150 bytes)
+src\services\database\disbursement_plan.py (1557 bytes)
+src\services\database\invoice.py (2062 bytes)
+src\services\database\schema.py (2879 bytes)
+src\services\database\supplier.py (1409 bytes)
+src\utils\interest_calculator.py (3692 bytes)
+static\css\style.css (5784 bytes)
+static\js\api.js (2320 bytes)
+static\js\main.js (6790 bytes)
+static\js\state.js (405 bytes)
+static\js\ui\common.js (4090 bytes)
+static\js\ui\disbursementUI.js (4913 bytes)
+static\js\ui\invoiceUI.js (5810 bytes)
+static\js\ui\planUI.js (3324 bytes)
+static\js\ui\supplierUI.js (2797 bytes)
+templates\base.html (2243 bytes)
+templates\home.html (5153 bytes)
 
-Tổng cộng: 29 file
+Tổng cộng: 36 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
@@ -165,20 +181,25 @@ FILE: requirements.txt
 fastapi
 uvicorn[standard]
 pydantic-settings
-supabase
 jinja2
+sqlalchemy[asyncio]>=2.0
+asyncpg
 ============================================================
 
 ============================================================
 FILE: src\core\app.py
 ============================================================
+# File: src/core/app.py (ĐÃ SỬA LỖI)
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
 # Import routers
 from src.routes import suppliers, invoices, pages, disbursement_plans, disbursements
+
+# Import đối tượng templates từ file mới
+from .templating import templates 
 
 app = FastAPI(title="Project Loan Tracker")
 
@@ -188,17 +209,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # 1. Mount thư mục static
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
-# 2. Cấu hình Jinja2Templates
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
-# 3. Gắn các API Routers (thêm các router còn thiếu)
+
+# 3. Gắn các API Routers (giữ nguyên)
+
 app.include_router(suppliers.router, prefix="/api/v1/suppliers", tags=["Suppliers"])
 app.include_router(invoices.router, prefix="/api/v1/invoices", tags=["Invoices"])
 app.include_router(disbursement_plans.router, prefix="/api/v1/plans", tags=["Disbursement Plans"])
 app.include_router(disbursements.router, prefix="/api/v1/disbursements", tags=["Disbursements"])
 
 
-# 4. Gắn Page Router (phục vụ HTML)
+# 4. Gắn Page Router (phục vụ HTML - giữ nguyên)
 app.include_router(pages.router, tags=["Web Pages"])
 ============================================================
 
@@ -208,92 +229,244 @@ FILE: src\core\config.py
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    SUPABASE_URL: str
-    SUPABASE_KEY: str
+    DATABASE_URL: str
 
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()
+
 ============================================================
 
 ============================================================
-FILE: src\plan_service.py
+FILE: src\core\templating.py
 ============================================================
-from src.services.database import disbursement_plan as plan_db
+# File: src/core/templating.py
 
-def get_all_plans():
-    return plan_db.db_get_all_disbursement_plans()
+from fastapi.templating import Jinja2Templates
+from pathlib import Path
+
+# Xác định đường dẫn thư mục gốc của dự án
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Khởi tạo đối tượng templates ở đây
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 ============================================================
 
 ============================================================
 FILE: src\routes\disbursement_plans.py
 ============================================================
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from src.schemas.disbursement_plan import DisbursementPlanResponse
-import src.plan_service as plan_service
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.disbursement_plan import DisbursementPlanResponse, DisbursementPlanCreate, DisbursementPlanUpdate
+from src.schemas.disbursement import GenerateInterestScheduleResponse
+from src.services.database import disbursement_plan as plan_db
+from src.services.database.base import get_db_session
+from src.services.database.disbursement import generate_interest_schedule, delete_interest_schedule
 
 router = APIRouter()
 
 @router.get("", response_model=List[DisbursementPlanResponse])
-def get_all_disbursement_plans():
-    """
-    API endpoint để lấy tất cả các kế hoạch giải ngân.
-    Đây là API mà main.js sẽ gọi đầu tiên.
-    """
-    return plan_service.get_all_plans()
+async def get_all_disbursement_plans(db: AsyncSession = Depends(get_db_session)):
+    return await plan_db.db_get_all_disbursement_plans(db)
+
+@router.post("", response_model=DisbursementPlanResponse, status_code=201)
+async def create_new_disbursement_plan(
+    plan: DisbursementPlanCreate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """API để tạo kế hoạch mới."""
+    return await plan_db.db_create_disbursement_plan(db, plan)
+
+@router.post("/{plan_id}/generate-interest-schedule", response_model=GenerateInterestScheduleResponse)
+async def create_interest_schedule_for_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Tạo lịch trả lãi tự động cho toàn bộ Kế hoạch."""
+    result = await generate_interest_schedule(db=db, plan_id=plan_id)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    return GenerateInterestScheduleResponse(**result)
+
+@router.delete("/{plan_id}/interest-schedule")
+async def remove_interest_schedule_for_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Xóa tất cả lịch trả lãi của một Kế hoạch."""
+    result = await delete_interest_schedule(db=db, plan_id=plan_id)
+    return result
+
+
+@router.get("/{plan_id}", response_model=DisbursementPlanResponse)
+async def read_plan_by_id(plan_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để lấy thông tin chi tiết của 1 kế hoạch."""
+    db_plan = await plan_db.db_get_plan_by_id(db, plan_id=plan_id)
+    if db_plan is None:
+        raise HTTPException(status_code=404, detail="Disbursement plan not found")
+    return db_plan
+
+@router.put("/{plan_id}", response_model=DisbursementPlanResponse)
+async def update_existing_plan(
+    plan_id: int,
+    plan_in: DisbursementPlanUpdate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """API để cập nhật thông tin kế hoạch."""
+    db_plan = await plan_db.db_get_plan_by_id(db, plan_id=plan_id)
+    if db_plan is None:
+        raise HTTPException(status_code=404, detail="Disbursement plan not found")
+    
+    return await plan_db.db_update_plan(db, db_plan=db_plan, plan_in=plan_in)
+
+@router.delete("/{plan_id}", status_code=204)
+async def delete_existing_plan(plan_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để xóa kế hoạch."""
+    db_plan = await plan_db.db_get_plan_by_id(db, plan_id=plan_id)
+    if db_plan is None:
+        raise HTTPException(status_code=404, detail="Disbursement plan not found")
+    
+    await plan_db.db_delete_plan(db, db_plan=db_plan)
+    return None
 ============================================================
 
 ============================================================
 FILE: src\routes\disbursements.py
 ============================================================
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from src.schemas.disbursement import DisbursementResponse, DisbursementCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.disbursement import DisbursementResponse, DisbursementCreate, DisbursementUpdate
 from src.services.database import disbursement as disbursement_db
+from src.services.database.base import get_db_session
 
 router = APIRouter()
 
-# THAY ĐỔI: Endpoint lấy theo plan_id
 @router.get("/plan/{plan_id}", response_model=List[DisbursementResponse])
-def get_disbursements_for_plan(plan_id: int):
-    return disbursement_db.db_get_disbursements_by_plan_id(plan_id)
+async def get_disbursements_for_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    return await disbursement_db.db_get_disbursements_by_plan_id(db, plan_id)
 
 @router.post("/", response_model=DisbursementResponse, status_code=201)
-def create_new_disbursement(disbursement: DisbursementCreate):
-    return disbursement_db.db_create_disbursement(disbursement)
+async def create_new_disbursement(
+    disbursement: DisbursementCreate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    return await disbursement_db.db_create_disbursement(db, disbursement)
+
+@router.get("/{disbursement_id}", response_model=DisbursementResponse)
+async def read_disbursement_by_id(disbursement_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để lấy thông tin chi tiết của 1 lần giải ngân."""
+    db_disbursement = await disbursement_db.db_get_disbursement_by_id(db, disbursement_id=disbursement_id)
+    if db_disbursement is None:
+        raise HTTPException(status_code=404, detail="Disbursement not found")
+    return db_disbursement
+
+@router.put("/{disbursement_id}", response_model=DisbursementResponse)
+async def update_existing_disbursement(
+    disbursement_id: int,
+    disbursement_in: DisbursementUpdate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """API để cập nhật thông tin giải ngân."""
+    db_disbursement = await disbursement_db.db_get_disbursement_by_id(db, disbursement_id=disbursement_id)
+    if db_disbursement is None:
+        raise HTTPException(status_code=404, detail="Disbursement not found")
+    
+    return await disbursement_db.db_update_disbursement(db, db_disbursement=db_disbursement, disbursement_in=disbursement_in)
+
+@router.delete("/{disbursement_id}", status_code=204)
+async def delete_existing_disbursement(disbursement_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để xóa một lần giải ngân."""
+    db_disbursement = await disbursement_db.db_get_disbursement_by_id(db, disbursement_id=disbursement_id)
+    if db_disbursement is None:
+        raise HTTPException(status_code=404, detail="Disbursement not found")
+    
+    await disbursement_db.db_delete_disbursement(db, db_disbursement=db_disbursement)
+    return None
 ============================================================
 
 ============================================================
 FILE: src\routes\invoices.py
 ============================================================
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from src.schemas.invoice import InvoiceCreate, InvoiceResponse, InvoiceWithSupplierResponse
-from src.services import invoice_service
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.invoice import InvoiceCreate, InvoiceResponse, InvoiceWithSupplierResponse, InvoiceUpdate, InvoiceDetailResponse
+from src.services.database import invoice as invoice_db
+from src.services.database.base import get_db_session
 
 router = APIRouter()
 
+
+@router.get("/", response_model=List[InvoiceDetailResponse])
+async def read_all_invoices(db: AsyncSession = Depends(get_db_session)):
+    """Lấy danh sách tất cả hóa đơn."""
+    return await invoice_db.db_get_all_invoices(db)
+
 @router.post("/", response_model=InvoiceResponse, status_code=201)
-def create_new_invoice(invoice: InvoiceCreate):
+async def create_new_invoice(
+    invoice: InvoiceCreate,
+    db: AsyncSession = Depends(get_db_session)
+):
     try:
-        return invoice_service.create_invoice(invoice)
+        return await invoice_db.db_create_invoice(db, invoice)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# Sửa lại endpoint này để khớp với frontend
 @router.get("/plan/{plan_id}", response_model=List[InvoiceWithSupplierResponse])
-def read_invoices_for_plan(plan_id: int):
-    return invoice_service.get_all_invoices_by_plan_id(plan_id)
+async def read_invoices_for_plan(
+    plan_id: int,
+    db: AsyncSession = Depends(get_db_session)
+):
+    return await invoice_db.db_get_all_invoices_by_plan_id(db, plan_id)
+
+@router.get("/{invoice_id}", response_model=InvoiceDetailResponse)
+async def read_invoice_by_id(invoice_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để lấy thông tin chi tiết của 1 hóa đơn."""
+    db_invoice = await invoice_db.db_get_invoice_by_id(db, invoice_id=invoice_id)
+    if db_invoice is None:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return db_invoice
+
+@router.put("/{invoice_id}", response_model=InvoiceResponse)
+async def update_existing_invoice(
+    invoice_id: int,
+    invoice_in: InvoiceUpdate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """API để cập nhật thông tin hóa đơn."""
+    db_invoice = await invoice_db.db_get_invoice_by_id(db, invoice_id=invoice_id)
+    if db_invoice is None:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    return await invoice_db.db_update_invoice(db, db_invoice=db_invoice, invoice_in=invoice_in)
+
+@router.delete("/{invoice_id}", status_code=204)
+async def delete_existing_invoice(invoice_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để xóa hóa đơn."""
+    db_invoice = await invoice_db.db_get_invoice_by_id(db, invoice_id=invoice_id)
+    if db_invoice is None:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    await invoice_db.db_delete_invoice(db, db_invoice=db_invoice)
+    return None
 ============================================================
 
 ============================================================
 FILE: src\routes\pages.py
 ============================================================
+# File: src/routes/pages.py (ĐÃ SỬA LỖI)
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from src.core.app import templates
+# Sửa dòng import này: thay vì từ src.core.app, hãy import từ file mới
+from src.core.templating import templates
 
 router = APIRouter()
 
@@ -311,23 +484,62 @@ async def home_page(request: Request):
 ============================================================
 FILE: src\routes\suppliers.py
 ============================================================
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from src.schemas.supplier import SupplierCreate, SupplierResponse
-from src.services import supplier_service
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.schemas.supplier import SupplierCreate, SupplierResponse, SupplierUpdate
+from src.services.database import supplier as supplier_db
+from src.services.database.base import get_db_session
 
 router = APIRouter()
 
 @router.post("/", response_model=SupplierResponse, status_code=201)
-def create_new_supplier(supplier: SupplierCreate):
+async def create_new_supplier(
+    supplier: SupplierCreate,
+    db: AsyncSession = Depends(get_db_session)
+):
     try:
-        return supplier_service.create_supplier(supplier)
+        return await supplier_db.db_create_supplier(db, supplier)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_model=List[SupplierResponse])
-def read_all_suppliers():
-    return supplier_service.get_all_suppliers()
+async def read_all_suppliers(db: AsyncSession = Depends(get_db_session)):
+    return await supplier_db.db_get_all_suppliers(db)
+
+@router.get("/{supplier_id}", response_model=SupplierResponse)
+async def read_supplier_by_id(supplier_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để lấy thông tin chi tiết của 1 nhà cung cấp."""
+    db_supplier = await supplier_db.db_get_supplier_by_id(db, supplier_id=supplier_id)
+    if db_supplier is None:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return db_supplier
+
+@router.put("/{supplier_id}", response_model=SupplierResponse)
+async def update_existing_supplier(
+    supplier_id: int,
+    supplier_in: SupplierUpdate,
+    db: AsyncSession = Depends(get_db_session)
+):
+    """API để cập nhật thông tin nhà cung cấp."""
+    db_supplier = await supplier_db.db_get_supplier_by_id(db, supplier_id=supplier_id)
+    if db_supplier is None:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    
+    return await supplier_db.db_update_supplier(db, db_supplier=db_supplier, supplier_in=supplier_in)
+
+@router.delete("/{supplier_id}", status_code=204)
+async def delete_existing_supplier(supplier_id: int, db: AsyncSession = Depends(get_db_session)):
+    """API để xóa nhà cung cấp."""
+    db_supplier = await supplier_db.db_get_supplier_by_id(db, supplier_id=supplier_id)
+    if db_supplier is None:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    
+    await supplier_db.db_delete_supplier(db, db_supplier=db_supplier)
+    # Status 204 No Content không trả về body
+    return None
+
+# --- KẾT THÚC PHẦN BỔ SUNG ---
 ============================================================
 
 ============================================================
@@ -340,74 +552,177 @@ FILE: src\schemas\__init__.py
 FILE: src\schemas\disbursement.py
 ============================================================
 from pydantic import BaseModel, Field
+from typing import Optional
 from datetime import date
+from decimal import Decimal
+
 
 class DisbursementBase(BaseModel):
     plan_id: int
-    planned_date: date | None = None
-    planned_amount: float | None = Field(None, gt=0)
-    actual_date: date | None = None
-    actual_amount: float | None = Field(None, gt=0)
-    bank_name: str | None = None
-    loan_contract_number: str | None = None
-    loan_term_months: int | None = Field(None, gt=0)
-    loan_interest_rate: float | None = Field(None, ge=0, le=1)
-    interest_amount: float | None = Field(None, ge=0)
-    interest_due_date: date | None = None
-    principal_due_date: date | None = None
+    planned_date: Optional[date] = None
+    planned_amount: Optional[Decimal] = None
+    actual_date: Optional[date] = None
+    actual_amount: Optional[Decimal] = None
+    bank_name: Optional[str] = None
+    loan_contract_number: Optional[str] = None
+    loan_term_months: Optional[int] = None
+    loan_interest_rate: Optional[float] = None
+    interest_amount: Optional[Decimal] = None
+    interest_due_date: Optional[date] = None
+    principal_due_date: Optional[date] = None
+    parent_disbursement_id: Optional[int] = None
+
 
 class DisbursementCreate(DisbursementBase):
     pass
 
+
+class DisbursementUpdate(BaseModel):
+    planned_date: Optional[date] = None
+    planned_amount: Optional[Decimal] = None
+    actual_date: Optional[date] = None
+    actual_amount: Optional[Decimal] = None
+    bank_name: Optional[str] = None
+    loan_contract_number: Optional[str] = None
+    loan_term_months: Optional[int] = None
+    loan_interest_rate: Optional[float] = None
+    interest_amount: Optional[Decimal] = None
+    interest_due_date: Optional[date] = None
+    principal_due_date: Optional[date] = None
+    parent_disbursement_id: Optional[int] = None
+
+
 class DisbursementResponse(DisbursementBase):
     id: int
+    created_at: date
+
     class Config:
         from_attributes = True
+
+
+class GenerateInterestScheduleRequest(BaseModel):
+    """Request để tạo lịch trả lãi"""
+    disbursement_id: int
+    periodic_interest_day: Optional[int] = Field(None, ge=1, le=31, description="Ngày trả lãi hàng tháng (1-31). Nếu null thì lấy từ plan")
+
+
+class GenerateInterestScheduleResponse(BaseModel):
+    """Response sau khi tạo lịch trả lãi"""
+    success: bool
+    message: str
+    schedules_created: int
+    schedule_dates: list[date]
+
 ============================================================
 
 ============================================================
 FILE: src\schemas\disbursement_plan.py
 ============================================================
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime
+
 
 class DisbursementPlanBase(BaseModel):
     name: str
-    description: str | None = None
+    description: Optional[str] = None
+    periodic_interest_day: int = Field(default=25, ge=1, le=31)
+
 
 class DisbursementPlanCreate(DisbursementPlanBase):
     pass
 
+
+class DisbursementPlanUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    periodic_interest_day: Optional[int] = Field(None, ge=1, le=31)
+
+
 class DisbursementPlanResponse(DisbursementPlanBase):
     id: int
+    created_at: datetime  
+
     class Config:
         from_attributes = True
+
 ============================================================
 
 ============================================================
 FILE: src\schemas\invoice.py
 ============================================================
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
-from .supplier import SupplierResponse
+from typing import Optional
 
+# Lớp cơ sở chứa các trường chung của một hóa đơn
 class InvoiceBase(BaseModel):
+    plan_id: int
+    supplier_id: int
+    invoice_number: str
+    issue_date: date
+    total_value: float
+
+# Schema dùng để TẠO MỚI một hóa đơn (dữ liệu đầu vào)
+class InvoiceCreate(InvoiceBase):
+    pass # Kế thừa tất cả các trường từ InvoiceBase
+
+
+
+
+
+# Schema dùng để TRẢ VỀ sau khi tạo mới hoặc lấy một hóa đơn
+class InvoiceResponse(InvoiceBase):
+    id: int
+    status: str
+
+    # Cấu hình để Pydantic có thể đọc dữ liệu từ object SQLAlchemy
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SupplierResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    name: str
+
+class InvoiceWithSupplierResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
     invoice_number: str
     issue_date: date
     total_value: float
     supplier_id: int
-    status: str = "Chưa thanh toán"
+    status: str
+    # Mối quan hệ này cho phép trả về thông tin của nhà cung cấp kèm theo hóa đơn
+    supplier: Optional[SupplierResponse] = None
 
-class InvoiceCreate(InvoiceBase):
-    pass
+class InvoiceUpdate(BaseModel):
+    plan_id: int | None = None         # Bổ sung cho phép sửa plan_id nếu cần
+    supplier_id: int | None = None
+    invoice_number: str | None = None
+    issue_date: date | None = None
+    total_value: float | None = None
+    status: str | None = None
 
-class InvoiceResponse(InvoiceBase):
+
+# Schema rút gọn cho Supplier khi hiển thị trong Invoice
+class SupplierRef(BaseModel):
     id: int
+    name: str
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+# Schema rút gọn cho Plan khi hiển thị trong Invoice
+class PlanRef(BaseModel):
+    id: int
+    name: str
+    model_config = ConfigDict(from_attributes=True)
 
-class InvoiceWithSupplierResponse(InvoiceResponse):
-    suppliers: SupplierResponse | None = None
+# Schema Invoice đầy đủ thông tin cho trang danh sách
+class InvoiceDetailResponse(InvoiceResponse):
+    supplier: Optional[SupplierRef] = None
+    plan: Optional[PlanRef] = None
 ============================================================
 
 ============================================================
@@ -422,6 +737,10 @@ class SupplierBase(BaseModel):
 class SupplierCreate(SupplierBase):
     pass
 
+class SupplierUpdate(BaseModel):
+    name: str | None = None
+    contact_info: str | None = None
+
 class SupplierResponse(SupplierBase):
     id: int
 
@@ -430,128 +749,697 @@ class SupplierResponse(SupplierBase):
 ============================================================
 
 ============================================================
-FILE: src\services\database\__init__.py
+FILE: src\services\database\base.py
 ============================================================
-import os
-from supabase import create_client, Client
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 from src.core.config import settings
+import logging
 
-# Lấy thông tin từ settings đã cấu hình
-url: str = settings.SUPABASE_URL
-key: str = settings.SUPABASE_KEY
+logger = logging.getLogger(__name__)
 
-# Khởi tạo client để các file khác có thể import và sử dụng
-supabase_client: Client = create_client(url, key)
+# Base class cho ORM models
+Base = declarative_base()
+
+# --- BẮT ĐẦU PHẦN SỬA LỖI ---
+
+# 1. Lấy URL từ file config ra một biến tạm
+db_url = settings.DATABASE_URL
+
+# 2. Kiểm tra xem biến DATABASE_URL có được thiết lập hay không
+if not db_url:
+    raise ValueError("Lỗi: Biến DATABASE_URL chưa được thiết lập trong file .env")
+
+# 3. Kiểm tra và tự động sửa chuỗi kết nối để sử dụng driver asyncpg
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    logger.info("Chuỗi kết nối đã được tự động cấu hình để sử dụng driver asyncpg.")
+
+# --- KẾT THÚC PHẦN SỬA LỖI ---
+
+
+# Tạo async engine với chuỗi kết nối đã được xử lý
+engine = create_async_engine(
+    db_url,  # <-- Sử dụng biến db_url đã được sửa
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800,
+    pool_pre_ping=True,
+    echo=False,
+    future=True
+)
+
+# Session factory (Phần này giữ nguyên)
+AsyncSessionFactory = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+async def get_db_session():
+    """Dependency để inject database session vào routes"""
+    async with AsyncSessionFactory() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 ============================================================
 
 ============================================================
 FILE: src\services\database\disbursement.py
 ============================================================
-from . import supabase_client
-from src.schemas.disbursement import DisbursementCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from .schema import Disbursement, DisbursementPlan  # Import cả hai
+from src.schemas.disbursement import DisbursementCreate, DisbursementUpdate
+from src.utils.interest_calculator import generate_interest_payment_dates
+from datetime import date
+from typing import List, Optional
 
-def db_create_disbursement(disbursement: DisbursementCreate):
-    res = supabase_client.table("disbursements").insert(disbursement.model_dump()).execute()
-    return res.data[0]
+# ==============================================================================
+# HÀM TẠO LỊCH TRẢ LÃI TỰ ĐỘNG (ĐÃ VIẾT LẠI THEO LOGIC MỚI)
+# ==============================================================================
 
-def db_get_disbursements_by_plan_id(plan_id: int):
-    res = supabase_client.table("disbursements").select("*").eq("plan_id", plan_id).order("actual_date").execute()
-    return res.data
+async def generate_interest_schedule(
+    db: AsyncSession,
+    plan_id: int  # <-- THAY ĐỔI: Dùng plan_id
+) -> dict:
+    """
+    Tạo lịch trả lãi tự động cho một Kế Hoạch Giải Ngân
+    
+    Args:
+        db: Database session
+        plan_id: ID của Kế Hoạch (DisbursementPlan)
+    
+    Returns:
+        dict với thông tin kết quả
+    """
+    
+    # 1. Lấy thông tin Kế Hoạch (Plan)
+    result = await db.execute(
+        select(DisbursementPlan).where(DisbursementPlan.id == plan_id)
+    )
+    plan = result.scalar_one_or_none()
+    
+    if not plan:
+        return {
+            "success": False,
+            "message": f"Không tìm thấy Kế hoạch (plan) với id={plan_id}",
+            "schedules_created": 0,
+            "schedule_dates": []
+        }
+    
+    # 2. Kiểm tra các trường bắt buộc TRÊN PLAN
+    if not plan.actual_date or not plan.principal_due_date:
+        return {
+            "success": False,
+            "message": "Kế hoạch này phải có 'Ngày thực tế vay' và 'Ngày đáo hạn (trả gốc)'",
+            "schedules_created": 0,
+            "schedule_dates": []
+        }
+    
+    # 3. Lấy ngày trả lãi định kỳ từ plan
+    periodic_interest_day = plan.periodic_interest_day
+    
+    # 4. Xóa các dòng trả lãi cũ (nếu có) để tạo lại
+    old_schedules_result = await db.execute(
+        select(Disbursement).where(Disbursement.plan_id == plan_id)
+    )
+    old_schedules = old_schedules_result.scalars().all()
+    
+    count_deleted = 0
+    for old_schedule in old_schedules:
+        await db.delete(old_schedule)
+        count_deleted += 1
+    
+    # 5. Tính toán các ngày trả lãi
+    payment_dates = generate_interest_payment_dates(
+        actual_date=plan.actual_date,
+        principal_due_date=plan.principal_due_date,
+        periodic_day=periodic_interest_day
+    )
+    
+    if not payment_dates:
+        return {
+            "success": False,
+            "message": "Không thể tạo lịch trả lãi (ngày vay >= ngày trả nợ gốc)",
+            "schedules_created": 0,
+            "schedule_dates": []
+        }
+    
+    # 6. Tạo các dòng disbursement (lịch lãi)
+    # Giả định schema.py đã được sửa, bảng Disbursement giờ RẤT đơn giản
+    created_schedules = []
+    for payment_date in payment_dates:
+        new_schedule = Disbursement(
+            plan_id=plan.id,
+            interest_due_date=payment_date, # Dùng cột mới `interest_due_date`
+            interest_amount=None,           # Tiền lãi sẽ được cập nhật sau
+            actual_date=None                # Ngày thực trả sẽ được cập nhật sau
+        )
+        db.add(new_schedule)
+        created_schedules.append(new_schedule)
+    
+    await db.commit() # Commit để lưu các thay đổi
+    
+    return {
+        "success": True,
+        "message": f"Đã xóa {count_deleted} lịch cũ. Đã tạo {len(payment_dates)} kỳ trả lãi mới thành công.",
+        "schedules_created": len(payment_dates),
+        "schedule_dates": payment_dates
+    }
+
+# ==============================================================================
+# HÀM XÓA LỊCH (CŨNG ĐƯỢC VIẾT LẠI THEO LOGIC MỚI)
+# ==============================================================================
+
+async def delete_interest_schedule(db: AsyncSession, plan_id: int) -> dict: # <-- THAY ĐỔI
+    """
+    Xóa tất cả lịch trả lãi của một Kế Hoạch
+    
+    Args:
+        db: Database session
+        plan_id: ID của Kế Hoạch (DisbursementPlan)
+    
+    Returns:
+        dict với thông tin kết quả
+    """
+    result = await db.execute(
+        select(Disbursement).where(Disbursement.plan_id == plan_id) # <-- THAY ĐỔI
+    )
+    schedules = result.scalars().all()
+    
+    count = len(schedules)
+    for schedule in schedules:
+        await db.delete(schedule)
+    
+    await db.commit()
+    
+    return {
+        "success": True,
+        "message": f"Đã xóa {count} kỳ trả lãi",
+        "schedules_deleted": count
+    }
+
+
+# ==============================================================================
+# CÁC HÀM CRUD CƠ BẢN (ĐÃ CẬP NHẬT THEO LOGIC MỚI)
+# ==============================================================================
+
+async def db_create_disbursement(db: AsyncSession, disbursement: DisbursementCreate):
+    """
+    Tạo một dòng lịch sử trả lãi (thường là thủ công, không dùng hàm tự động)
+    LƯU Ý: schema `DisbursementCreate` cần được cập nhật
+    """
+    # Hàm này giờ sẽ nhận schema create mới
+    # (schema.py cho DisbursementCreate cũng cần được sửa)
+    new_disbursement = Disbursement(**disbursement.model_dump())
+    db.add(new_disbursement)
+    await db.flush()
+    await db.refresh(new_disbursement)
+    return new_disbursement
+
+async def db_get_disbursements_by_plan_id(db: AsyncSession, plan_id: int):
+    """Lấy tất cả các kỳ trả lãi của một kế hoạch."""
+    result = await db.execute(
+        select(Disbursement)
+        .where(Disbursement.plan_id == plan_id)
+        .order_by(Disbursement.interest_due_date) # Sắp xếp theo ngày trả lãi
+    )
+    return result.scalars().all()
+
+async def db_get_disbursement_by_id(db: AsyncSession, disbursement_id: int) -> Disbursement | None:
+    """Lấy một kỳ trả lãi theo ID."""
+    result = await db.execute(select(Disbursement).where(Disbursement.id == disbursement_id))
+    return result.scalars().first()
+
+async def db_update_disbursement(db: AsyncSession, db_disbursement: Disbursement, disbursement_in: DisbursementUpdate) -> Disbursement:
+    """
+    Cập nhật thông tin một kỳ trả lãi (ví dụ: cập nhật số tiền đã trả)
+    LƯU Ý: schema `DisbursementUpdate` cần được cập nhật
+    """
+    update_data = disbursement_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_disbursement, key, value)
+    
+    await db.flush()
+    await db.refresh(db_disbursement)
+    return db_disbursement
+
+async def db_delete_disbursement(db: AsyncSession, db_disbursement: Disbursement):
+    """Xóa một kỳ trả lãi cụ thể."""
+    await db.delete(db_disbursement)
+    await db.flush()
 ============================================================
 
 ============================================================
 FILE: src\services\database\disbursement_plan.py
 ============================================================
-from . import supabase_client
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from .schema import DisbursementPlan
+from src.schemas.disbursement_plan import DisbursementPlanCreate, DisbursementPlanUpdate
 
-def db_get_all_disbursement_plans():
-    response = supabase_client.table("disbursement_plans").select("*").order("name").execute()
-    return response.data
+async def db_get_all_disbursement_plans(db: AsyncSession):
+    result = await db.execute(
+        select(DisbursementPlan).order_by(DisbursementPlan.name)
+    )
+    return result.scalars().all()
+
+async def db_create_disbursement_plan(db: AsyncSession, plan: DisbursementPlanCreate) -> DisbursementPlan:
+    """Tạo một kế hoạch giải ngân mới."""
+    new_plan = DisbursementPlan(**plan.model_dump())
+    db.add(new_plan)
+    await db.flush()
+    await db.refresh(new_plan)
+    return new_plan
+
+async def db_get_plan_by_id(db: AsyncSession, plan_id: int) -> DisbursementPlan | None:
+    """Lấy một kế hoạch theo ID."""
+    result = await db.execute(select(DisbursementPlan).where(DisbursementPlan.id == plan_id))
+    return result.scalars().first()
+
+async def db_update_plan(db: AsyncSession, db_plan: DisbursementPlan, plan_in: DisbursementPlanUpdate) -> DisbursementPlan:
+    """Cập nhật thông tin kế hoạch."""
+    update_data = plan_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_plan, key, value)
+    
+    await db.flush()
+    await db.refresh(db_plan)
+    return db_plan
+
+async def db_delete_plan(db: AsyncSession, db_plan: DisbursementPlan):
+    """Xóa một kế hoạch."""
+    await db.delete(db_plan)
+    await db.flush()
 ============================================================
 
 ============================================================
 FILE: src\services\database\invoice.py
 ============================================================
-from . import supabase_client
-from src.schemas.invoice import InvoiceCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+from .schema import Invoice, Supplier
+from src.schemas.invoice import InvoiceCreate, InvoiceUpdate
 
-def db_create_invoice(invoice: InvoiceCreate):
-    response = supabase_client.table("invoices").insert(invoice.model_dump()).execute()
-    return response.data[0]
 
-def db_get_all_invoices_by_plan_id(plan_id: int):
-    # Sửa lại hàm này để lọc theo plan_id
-    response = supabase_client.table("invoices").select("*, suppliers(id, name)").eq("plan_id", plan_id).order("issue_date", desc=True).execute()
-    return response.data
+
+async def db_get_all_invoices(db: AsyncSession):
+    """Lấy tất cả hóa đơn kèm thông tin NCC và Kế hoạch."""
+    result = await db.execute(
+        select(Invoice)
+        .options(
+            selectinload(Invoice.supplier),
+            selectinload(Invoice.plan)
+        )
+        .order_by(Invoice.issue_date.desc())
+    )
+    return result.scalars().all()
+
+
+async def db_create_invoice(db: AsyncSession, invoice: InvoiceCreate):
+    new_invoice = Invoice(**invoice.model_dump())
+    db.add(new_invoice)
+    await db.flush()
+    await db.refresh(new_invoice)
+    return new_invoice
+
+async def db_get_all_invoices_by_plan_id(db: AsyncSession, plan_id: int):
+    result = await db.execute(
+        select(Invoice)
+        .options(selectinload(Invoice.supplier))
+        .where(Invoice.plan_id == plan_id)
+        .order_by(Invoice.issue_date.desc())
+    )
+    return result.scalars().all()
+
+async def db_get_invoice_by_id(db: AsyncSession, invoice_id: int) -> Invoice | None:
+    result = await db.execute(
+        select(Invoice)
+        .options(
+            selectinload(Invoice.supplier),
+            selectinload(Invoice.plan)
+        )
+        .where(Invoice.id == invoice_id)
+    )
+    return result.scalars().first()
+
+async def db_update_invoice(db: AsyncSession, db_invoice: Invoice, invoice_in: InvoiceUpdate) -> Invoice:
+    """Cập nhật thông tin hóa đơn."""
+    update_data = invoice_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_invoice, key, value)
+    
+    await db.flush()
+    await db.refresh(db_invoice)
+    return db_invoice
+
+async def db_delete_invoice(db: AsyncSession, db_invoice: Invoice):
+    """Xóa một hóa đơn."""
+    await db.delete(db_invoice)
+    await db.flush()
+============================================================
+
+============================================================
+FILE: src\services\database\schema.py
+============================================================
+from sqlalchemy import Column, BigInteger, Text, Date, Numeric, Integer, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from datetime import datetime
+from .base import Base
+
+
+class Supplier(Base):
+    __tablename__ = "suppliers"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(Text, nullable=False)
+    contact_info = Column(Text)
+    created_at = Column(Date, server_default=func.now())
+    
+    # Relationship
+    invoices = relationship("Invoice", back_populates="supplier")
+
+
+class DisbursementPlan(Base):
+    __tablename__ = "disbursement_plans"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(Text, nullable=False)
+    description = Column(Text)
+    periodic_interest_day = Column(Integer, default=25)  # ← THÊM DÒNG NÀY
+    created_at = Column(Date, server_default=func.now())
+    actual_date = Column(Date)              # Ngày thực tế vay
+    principal_due_date = Column(Date)       # Ngày đáo hạn
+    bank_name = Column(Text)                # (Nên thêm cả thông tin ngân hàng ở đây)
+    loan_contract_number = Column(Text)     # (Và số hợp đồng)
+
+    # Relationships
+    invoices = relationship("Invoice", back_populates="plan", cascade="all, delete-orphan")
+    disbursements = relationship("Disbursement", back_populates="plan", cascade="all, delete-orphan")
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    plan_id = Column(BigInteger, ForeignKey("disbursement_plans.id", ondelete="CASCADE"))
+    supplier_id = Column(BigInteger, ForeignKey("suppliers.id", ondelete="SET NULL"))
+    invoice_number = Column(Text, nullable=False)
+    issue_date = Column(Date, nullable=False)
+    total_value = Column(Numeric(15, 2), nullable=False)
+    status = Column(Text, default="Chưa thanh toán")
+    created_at = Column(Date, server_default=func.now())
+    
+    # Relationships
+    plan = relationship("DisbursementPlan", back_populates="invoices")
+    supplier = relationship("Supplier", back_populates="invoices")
+
+
+class Disbursement(Base):
+    __tablename__ = "disbursements"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    plan_id = Column(BigInteger, ForeignKey("disbursement_plans.id", ondelete="CASCADE"))
+    
+    interest_due_date = Column(Date)  # Ngày phải trả lãi (quan trọng nhất)
+    interest_amount = Column(Numeric(15, 2)) # Số tiền lãi (tính sau)
+    actual_date = Column(Date) # Có thể dùng cột này để lưu NGÀY THỰC TẾ ĐÃ TRẢ
+    
+    created_at = Column(Date, server_default=func.now())
+    
+    # Relationships
+    plan = relationship("DisbursementPlan", back_populates="disbursements")
 ============================================================
 
 ============================================================
 FILE: src\services\database\supplier.py
 ============================================================
-from . import supabase_client
-from src.schemas.supplier import SupplierCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from .schema import Supplier
+from src.schemas.supplier import SupplierCreate, SupplierUpdate
 
-def db_create_supplier(supplier: SupplierCreate):
-    response = supabase_client.table("suppliers").insert(supplier.model_dump()).execute()
-    return response.data[0]
+async def db_create_supplier(db: AsyncSession, supplier: SupplierCreate):
+    new_supplier = Supplier(**supplier.model_dump())
+    db.add(new_supplier)
+    await db.flush()
+    await db.refresh(new_supplier)
+    return new_supplier
 
-def db_get_all_suppliers():
-    response = supabase_client.table("suppliers").select("*").order("id").execute()
-    return response.data
+async def db_get_all_suppliers(db: AsyncSession):
+    result = await db.execute(select(Supplier).order_by(Supplier.id))
+    return result.scalars().all()
+
+async def db_get_supplier_by_id(db: AsyncSession, supplier_id: int) -> Supplier | None:
+    """Lấy một nhà cung cấp theo ID."""
+    result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
+    return result.scalars().first()
+
+async def db_update_supplier(db: AsyncSession, db_supplier: Supplier, supplier_in: SupplierUpdate) -> Supplier:
+    """Cập nhật thông tin nhà cung cấp."""
+    update_data = supplier_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_supplier, key, value)
+    
+    await db.flush()
+    await db.refresh(db_supplier)
+    return db_supplier
+
+async def db_delete_supplier(db: AsyncSession, db_supplier: Supplier):
+    """Xóa một nhà cung cấp."""
+    await db.delete(db_supplier)
+    await db.flush()
 ============================================================
 
 ============================================================
-FILE: src\services\invoice_service.py
+FILE: src\utils\interest_calculator.py
 ============================================================
-from src.services.database import invoice as invoice_db
-from src.schemas.invoice import InvoiceCreate
+"""
+Helper functions để tính toán lịch trả lãi
+"""
+from datetime import date, timedelta
+from typing import List
 
-def create_invoice(invoice: InvoiceCreate):
-    return invoice_db.db_create_invoice(invoice)
 
-def get_all_invoices_by_plan_id(plan_id: int):
-    # Sửa lại hàm này
-    return invoice_db.db_get_all_invoices_by_plan_id(plan_id)
-============================================================
+def get_next_business_day(target_date: date) -> date:
+    """
+    Nếu ngày rơi vào thứ 7 (5) hoặc Chủ nhật (6), chuyển sang thứ 2
+    
+    Args:
+        target_date: Ngày cần kiểm tra
+    
+    Returns:
+        Ngày thứ 2 kế tiếp nếu là cuối tuần, nguyên ngày nếu không
+    """
+    # weekday(): 0=Monday, 1=Tuesday, ..., 5=Saturday, 6=Sunday
+    while target_date.weekday() >= 5:  # 5=Saturday, 6=Sunday
+        target_date += timedelta(days=1)
+    return target_date
 
-============================================================
-FILE: src\services\supplier_service.py
-============================================================
-from src.services.database import supplier as supplier_db
-from src.schemas.supplier import SupplierCreate
 
-def create_supplier(supplier: SupplierCreate):
-    return supplier_db.db_create_supplier(supplier)
-
-def get_all_suppliers():
-    return supplier_db.db_get_all_suppliers()
+def generate_interest_payment_dates(
+    actual_date: date,
+    principal_due_date: date,
+    periodic_day: int = 25
+) -> List[date]:
+    """
+    Sinh ra các ngày trả lãi hàng tháng
+    
+    Logic:
+    1. Nếu ngày giải ngân >= 15 → bỏ qua tháng đó, bắt đầu từ tháng sau
+    2. Mỗi tháng trả vào ngày `periodic_day` (mặc định 25)
+    3. Nếu rơi thứ 7/CN → chuyển sang thứ 2
+    4. Tháng cuối: dùng `principal_due_date` thay vì ngày periodic_day
+    
+    Args:
+        actual_date: Ngày thực tế giải ngân
+        principal_due_date: Ngày đến hạn trả nợ gốc
+        periodic_day: Ngày trả lãi hàng tháng (1-31)
+    
+    Returns:
+        List các ngày trả lãi đã điều chỉnh
+    """
+    if actual_date >= principal_due_date:
+        return []
+    
+    payment_dates = []
+    current_month_start = actual_date.replace(day=1)
+    
+    # Rule 1: Nếu ngày giải ngân >= 15 → bắt đầu từ tháng sau
+    if actual_date.day >= 15:
+        # Sang tháng sau
+        if current_month_start.month == 12:
+            current_month_start = current_month_start.replace(year=current_month_start.year + 1, month=1)
+        else:
+            current_month_start = current_month_start.replace(month=current_month_start.month + 1)
+    
+    # Tạo lịch trả lãi từng tháng
+    while True:
+        # Tạo ngày trả lãi cho tháng hiện tại
+        try:
+            payment_date = current_month_start.replace(day=periodic_day)
+        except ValueError:
+            # Tháng không có ngày periodic_day (VD: tháng 2 có 28/29 ngày mà periodic_day=30)
+            # → Lấy ngày cuối tháng
+            if current_month_start.month == 12:
+                next_month = current_month_start.replace(year=current_month_start.year + 1, month=1)
+            else:
+                next_month = current_month_start.replace(month=current_month_start.month + 1)
+            payment_date = next_month - timedelta(days=1)
+        
+        # Rule 4: Tháng cuối → dùng principal_due_date
+        if payment_date.year == principal_due_date.year and payment_date.month == principal_due_date.month:
+            payment_date = principal_due_date
+            payment_dates.append(payment_date)
+            break
+        
+        # Nếu vượt quá ngày trả nợ gốc → dừng
+        if payment_date > principal_due_date:
+            break
+        
+        # Rule 3: Điều chỉnh nếu rơi thứ 7/CN (trừ tháng cuối)
+        payment_date = get_next_business_day(payment_date)
+        payment_dates.append(payment_date)
+        
+        # Sang tháng tiếp theo
+        if current_month_start.month == 12:
+            current_month_start = current_month_start.replace(year=current_month_start.year + 1, month=1)
+        else:
+            current_month_start = current_month_start.replace(month=current_month_start.month + 1)
+    
+    return payment_dates
 ============================================================
 
 ============================================================
 FILE: static\css\style.css
 ============================================================
+/* FILE: static/css/style.css (THAY THẾ TOÀN BỘ) */
+
+/* --- BIẾN MÀU VÀ FONT CHỮ --- */
+:root {
+    --primary-color: #1976d2; /* Blue */
+    --primary-color-dark: #004ba0;
+    --accent-color: #ff4081; /* Pink */
+    --background-color: #f5f5f5;
+    --surface-color: #ffffff;
+    --text-color-primary: #212121;
+    --text-color-secondary: #757575;
+    --divider-color: #e0e0e0;
+    --box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* --- THIẾT LẬP CƠ BẢN --- */
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color-primary);
     margin: 0;
-    padding: 20px;
+    line-height: 1.6;
 }
 
-.container {
-    max-width: 1200px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
+/* --- LAYOUT CHÍNH --- */
+.app-bar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 16px 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.main-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.management-view {
+    display: none; /* Mặc định ẩn các view */
+}
+
+.management-view.active {
+    display: block; /* Hiện view được chọn */
+}
+
+/* --- CARD (KHUNG CHỨA NỘI DUNG) --- */
+.card {
+    background: var(--surface-color);
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: var(--box-shadow);
+    padding: 24px;
+    margin-top: 16px;
 }
 
-header h1 {
-    text-align: center;
-    color: #4a4a4a;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--divider-color);
 }
 
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+/* --- BUTTON --- */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.btn-primary:hover {
+    background-color: var(--primary-color-dark);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    color: var(--text-color-secondary);
+}
+.icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+.icon-btn .material-icons {
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+/* --- BẢNG DỮ LIỆU --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -559,140 +1447,932 @@ table {
 }
 
 th, td {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--divider-color);
     text-align: left;
 }
 
 th {
-    background-color: #007bff;
-    color: white;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
 }
 
-tr:nth-child(even) {
-    background-color: #f2f2f2;
+tr:last-child td {
+    border-bottom: none;
 }
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+td.actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* --- MODAL (FORM POP-UP) --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-backdrop.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--surface-color);
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 500px;
+    transform: translateY(-50px);
+    transition: transform 0.3s;
+}
+
+.modal-backdrop.visible .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    margin-bottom: 24px;
+}
+
+/* --- FORM INPUT --- */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--divider-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Header và Navbar */
+.app-bar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-bar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 16px 24px;
+}
+
+.navbar {
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+}
+
+.nav-btn {
+    background: transparent;
+    color: white;
+    border: none;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.nav-btn.active {
+    background-color: rgba(255,255,255,0.15);
+    border-bottom: 3px solid white;
+}
+
+.nav-btn .material-icons {
+    font-size: 20px;
+}
+
+============================================================
+
+============================================================
+FILE: static\js\api.js
+============================================================
+async function fetchAPI(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...options.headers };
+    const response = await fetch(`/api/v1${endpoint}`, { ...options, headers });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Có lỗi xảy ra');
+    }
+    if (response.status === 204) return null;
+    return response.json();
+}
+
+export const planAPI = {
+    getAll: () => fetchAPI('/plans/'),
+    getById: (id) => fetchAPI(`/plans/${id}`),
+    create: (data) => fetchAPI('/plans/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`/plans/${id}`, { method: 'DELETE' }),
+    generateSchedule: (planId) => fetchAPI(`/plans/${planId}/generate-interest-schedule`, { method: 'POST' }),
+    deleteSchedule: (planId) => fetchAPI(`/plans/${planId}/interest-schedule`, { method: 'DELETE' }),
+};
+
+export const supplierAPI = {
+    getAll: () => fetchAPI('/suppliers/'),
+    getById: (id) => fetchAPI(`/suppliers/${id}`),
+    create: (data) => fetchAPI('/suppliers/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`/suppliers/${id}`, { method: 'DELETE' }),
+};
+
+export const invoiceAPI = {
+    getByPlanId: (planId) => fetchAPI(`/invoices/plan/${planId}`),
+    getById: (id) => fetchAPI(`/invoices/${id}`),
+    create: (data) => fetchAPI('/invoices/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`/invoices/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`/invoices/${id}`, { method: 'DELETE' }),
+};
+
+export const disbursementAPI = {
+    getByPlanId: (planId) => fetchAPI(`/disbursements/plan/${planId}`),
+    getById: (id) => fetchAPI(`/disbursements/${id}`),
+    create: (data) => fetchAPI('/disbursements/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`/disbursements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`/disbursements/${id}`, { method: 'DELETE' }),
+};
 ============================================================
 
 ============================================================
 FILE: static\js\main.js
 ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-    const plansContainer = document.getElementById('plans-container');
-    const detailsSection = document.getElementById('details-section');
-    const invoicesContainer = document.getElementById('invoices-container');
-    const disbursementsContainer = document.getElementById('disbursements-container');
-    const planNameSpan = document.getElementById('plan-name');
+import state, { setState } from './state.js';
+import { planAPI, supplierAPI, invoiceAPI, disbursementAPI } from './api.js';
+import { DOM, showMainListView, showPlanDetailsView, showTabInMainView, openModal, closeModal, handleFormSubmit } from './ui/common.js';
+import { loadPlans } from './ui/planUI.js';
+import { loadSuppliers, loadSuppliersCache } from './ui/supplierUI.js';
+import { loadInvoices, changeInvoicePage } from './ui/invoiceUI.js';
+import { loadDisbursements } from './ui/disbursementUI.js';
+
+// --- MAIN FUNCTION TO LOAD PLAN DETAILS ---
+export async function loadPlanDetails(planId) {
+    showPlanDetailsView();
+    const planDetailsTitle = document.getElementById('plan-details-title');
+    const planDetailsDescription = document.getElementById('plan-details-description');
     
-    const formatCurrency = (value) => value != null ? new Intl.NumberFormat('vi-VN').format(value) : 'N/A';
-    const formatDate = (value) => value ? new Date(value).toLocaleDateString('vi-VN') : 'N/A';
+    planDetailsTitle.textContent = "Đang tải chi tiết kế hoạch...";
+    planDetailsDescription.textContent = "";
 
-    // 1. Hiển thị danh sách các Kế hoạch
-    async function displayPlans() {
-        try {
-            const response = await fetch('/api/v1/plans');
-            const plans = await response.json();
-            let html = '<ul>';
-            plans.forEach(plan => {
-                html += `<li><a href="#" class="plan-link" data-id="${plan.id}" data-name="${plan.name}">${plan.name}</a></li>`;
-            });
-            html += '</ul>';
-            plansContainer.innerHTML = html;
-
-            document.querySelectorAll('.plan-link').forEach(link => {
-                link.addEventListener('click', handlePlanClick);
-            });
-        } catch (error) {
-            plansContainer.innerHTML = '<p style="color:red;">Lỗi tải danh sách kế hoạch.</p>';
-        }
-    }
-
-    // 2. Xử lý khi click vào một Kế hoạch
-    async function handlePlanClick(event) {
-        event.preventDefault();
-        const planId = event.target.dataset.id;
-        const planName = event.target.dataset.name;
+    try {
+        const planData = await planAPI.getById(planId);
+        setState({ selectedPlan: planData });
         
-        planNameSpan.textContent = planName;
-        detailsSection.style.display = 'block';
-        invoicesContainer.innerHTML = '<p>Đang tải hóa đơn...</p>';
-        disbursementsContainer.innerHTML = '<p>Đang tải chi tiết giải ngân...</p>';
+        planDetailsTitle.textContent = `Chi tiết cho Kế hoạch: ${planData.name}`;
+        planDetailsDescription.textContent = planData.description || '';
         
-        // Gọi cả hai hàm để tải dữ liệu song song
+        // Tải hóa đơn và giải ngân song song
         await Promise.all([
-            displayInvoices(planId),
-            displayDisbursements(planId)
+            loadInvoices(planId),
+            loadDisbursements(planId)
         ]);
+
+    } catch (e) {
+        planDetailsTitle.textContent = "Lỗi tải chi tiết kế hoạch";
+        console.error(e);
     }
+}
 
-    // 3. Hiển thị Hóa đơn cho một Kế hoạch
-    async function displayInvoices(planId) {
-        const response = await fetch(`/api/v1/invoices/plan/${planId}`);
-        const invoices = await response.json();
+// --- EVENT LISTENERS ---
+function setupEventListeners() {
+    // Navigation
+    DOM.navPlans.addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('plan-management-view');
+        loadPlans();
+    });
 
-        if (invoices.length === 0) {
-            invoicesContainer.innerHTML = '<p>Kế hoạch này chưa có hóa đơn.</p>';
-            return;
+    DOM.navSuppliers.addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('supplier-management-view');
+        loadSuppliers();
+    });
+
+    document.getElementById('back-to-list-btn').addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('plan-management-view');
+        loadPlans();
+    });
+
+    // Add buttons
+    document.getElementById('add-plan-btn').addEventListener('click', () => openModal('plan'));
+    document.getElementById('add-supplier-btn').addEventListener('click', () => openModal('supplier'));
+    document.getElementById('add-invoice-btn').addEventListener('click', () => openModal('invoice'));
+    document.getElementById('add-disbursement-btn').addEventListener('click', () => openModal('disbursement'));
+
+    // Modal
+    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+    DOM.modal.addEventListener('click', e => { if(e.target === DOM.modal) closeModal(); });
+    DOM.entityForm.addEventListener('submit', handleFormSubmit);
+
+    document.getElementById('generate-schedule-btn-auto').addEventListener('click', async () => {
+        if (!state.selectedPlan || !state.selectedPlan.id) return;
+        const plan = state.selectedPlan;
+        if (confirm(`Tạo/Cập nhật lịch trả lãi cho kế hoạch "${plan.name}"? Lịch cũ (nếu có) sẽ bị xóa.`)) {
+            try {
+                const result = await planAPI.generateSchedule(plan.id);
+                alert(result.message);
+                loadPlanDetails(plan.id);
+            } catch (e) { alert(`Lỗi: ${e.message}`); }
         }
+    });
 
-        let table = `<table><thead><tr><th>Số HĐ</th><th>Ngày HĐ</th><th>NCC</th><th>Giá trị</th><th>Trạng thái</th></tr></thead><tbody>`;
-        invoices.forEach(inv => {
-            table += `<tr>
-                <td>${inv.invoice_number}</td>
-                <td>${formatDate(inv.issue_date)}</td>
-                <td>${inv.suppliers ? inv.suppliers.name : 'N/A'}</td>
-                <td>${formatCurrency(inv.total_value)}</td>
-                <td>${inv.status}</td>
-            </tr>`;
-        });
-        table += '</tbody></table>';
-        invoicesContainer.innerHTML = table;
-    }
-
-    // 4. Hiển thị các Lần Giải ngân cho một Kế hoạch
-    async function displayDisbursements(planId) {
-        const response = await fetch(`/api/v1/disbursements/plan/${planId}`);
-        const disbursements = await response.json();
-
-        if (disbursements.length === 0) {
-            disbursementsContainer.innerHTML = '<p>Kế hoạch này chưa có lần giải ngân nào.</p>';
-            return;
+    document.getElementById('delete-schedule-btn-auto').addEventListener('click', async () => {
+        if (!state.selectedPlan || !state.selectedPlan.id) return;
+        const plan = state.selectedPlan;
+        if (confirm(`Xóa toàn bộ lịch trả lãi của kế hoạch "${plan.name}"?`)) {
+            try {
+                const result = await planAPI.deleteSchedule(plan.id);
+                alert(result.message);
+                loadPlanDetails(plan.id);
+            } catch (e) { alert(`Lỗi: ${e.message}`); }
         }
+    });
+
+
+    // Delegated events for tables
+    document.body.addEventListener('click', async (event) => {
+        const target = event.target;
         
-        let cumulativeAmount = 0;
-        let table = `<table><thead><tr>
-            <th>Ngày GN thực tế</th><th>Giá trị GN</th><th>Lũy kế</th><th>Ngân hàng</th><th>Số khế ước</th><th>Lãi suất</th><th>Ngày đáo hạn</th>
-        </tr></thead><tbody>`;
+        // View plan details
+        if (target.matches('.view-details-link')) {
+            event.preventDefault();
+            loadPlanDetails(target.closest('tr').dataset.id);
+        }
 
-        disbursements.forEach(d => {
-            cumulativeAmount += d.actual_amount || 0;
-            table += `<tr>
-                <td>${formatDate(d.actual_date)}</td>
-                <td>${formatCurrency(d.actual_amount)}</td>
-                <td>${formatCurrency(cumulativeAmount)}</td>
-                <td>${d.bank_name || 'N/A'}</td>
-                <td>${d.loan_contract_number || 'N/A'}</td>
-                <td>${d.loan_interest_rate ? (d.loan_interest_rate * 100).toFixed(2) + '%' : 'N/A'}</td>
-                <td>${formatDate(d.principal_due_date)}</td>
-            </tr>`;
-        });
-        table += '</tbody></table>';
-        disbursementsContainer.innerHTML = table;
+        // Pagination for invoices
+        const paginationBtn = target.closest('.pagination-btn');
+        if (paginationBtn) {
+            changeInvoicePage(parseInt(paginationBtn.dataset.page));
+        }
+
+        // Generic Edit/Delete buttons
+        const iconBtn = target.closest('.icon-btn');
+        if (iconBtn) {
+            const row = iconBtn.closest('tr');
+            if(!row) return;
+
+            const id = row.dataset.id;
+            const type = row.dataset.type;
+
+            if (iconBtn.classList.contains('edit-btn')) {
+                try {
+                    let data;
+                    if (type === 'plan') data = await planAPI.getById(id);
+                    else if (type === 'supplier') data = await supplierAPI.getById(id);
+                    else if (type === 'invoice') data = await invoiceAPI.getById(id);
+                    else if (type === 'disbursement') data = await disbursementAPI.getById(id);
+                    
+                    if(data) openModal(type, data);
+
+                } catch(e) { alert(e.message); }
+            }
+            
+            if (iconBtn.classList.contains('delete-btn')) {
+                if (confirm(`Bạn chắc chắn muốn xóa mục (ID: ${id}) này?`)) {
+                    try {
+                        if (type === 'plan') await planAPI.delete(id);
+                        else if (type === 'supplier') { await supplierAPI.delete(id); loadSuppliersCache(); }
+                        else if (type === 'invoice') await invoiceAPI.delete(id);
+                        else if (type === 'disbursement') await disbursementAPI.delete(id);
+                        
+                        // Reload relevant data
+                        if (type === 'plan' || type === 'supplier') {
+                             loadPlans();
+                             loadSuppliers();
+                        }
+                        else if (type === 'invoice' || type === 'disbursement') {
+                            loadPlanDetails(state.selectedPlan.id);
+                        }
+
+                    } catch(e) { alert(e.message); }
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupEventListeners();
+    showMainListView();
+    showTabInMainView('plan-management-view');
+    loadPlans();
+    loadSuppliersCache();
+});
+============================================================
+
+============================================================
+FILE: static\js\state.js
+============================================================
+const state = {
+    currentEditingId: null,
+    currentEntityType: null,
+    selectedPlan: null,
+    
+    // Cache
+    suppliersCache: [],
+    
+    // Pagination cho hóa đơn
+    invoicePagination: {
+        currentPage: 1,
+        invoicesPerPage: 5,
+        allInvoices: []
+    }
+};
+
+export function setState(newState) {
+    Object.assign(state, newState);
+}
+
+export default state;
+============================================================
+
+============================================================
+FILE: static\js\ui\common.js
+============================================================
+import state, { setState } from '../state.js';
+import { getPlanFormHtml, handlePlanSubmit } from './planUI.js';
+import { getSupplierFormHtml, handleSupplierSubmit } from './supplierUI.js';
+import { getInvoiceFormHtml, handleInvoiceSubmit } from './invoiceUI.js';
+import { getDisbursementFormHtml, handleDisbursementSubmit } from './disbursementUI.js';
+
+export const DOM = {
+    mainListView: document.getElementById('main-list-view'),
+    planDetailsView: document.getElementById('plan-details-view'),
+    modal: document.getElementById('entity-modal'),
+    entityForm: document.getElementById('entity-form'),
+    modalTitle: document.getElementById('modal-title'),
+    planManagementView: document.getElementById('plan-management-view'),
+    supplierManagementView: document.getElementById('supplier-management-view'),
+    navPlans: document.getElementById('nav-plans'),
+    navSuppliers: document.getElementById('nav-suppliers'),
+};
+
+export function formatCurrency(amount) {
+    if (amount === null || amount === undefined) return '';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+
+export function formatDate(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString + 'T00:00:00').toLocaleDateString('vi-VN');
+}
+
+export function showMainListView() {
+    DOM.mainListView.style.display = 'block';
+    DOM.planDetailsView.style.display = 'none';
+    setState({ selectedPlan: null });
+}
+
+export function showPlanDetailsView() {
+    DOM.mainListView.style.display = 'none';
+    DOM.planDetailsView.style.display = 'block';
+}
+
+export function showTabInMainView(viewId) {
+    if (DOM.planManagementView) DOM.planManagementView.style.display = (viewId === 'plan-management-view') ? 'block' : 'none';
+    if (DOM.supplierManagementView) DOM.supplierManagementView.style.display = (viewId === 'supplier-management-view') ? 'block' : 'none';
+    if (DOM.navPlans) DOM.navPlans.classList.toggle('active', viewId === 'plan-management-view');
+    if (DOM.navSuppliers) DOM.navSuppliers.classList.toggle('active', viewId === 'supplier-management-view');
+}
+
+export function closeModal() {
+    DOM.modal.classList.remove('visible');
+    setTimeout(() => {
+        DOM.modal.classList.add('hidden');
+        DOM.entityForm.reset();
+        setState({ currentEditingId: null, currentEntityType: null });
+    }, 300);
+}
+
+export function openModal(type, entity = null) {
+    setState({
+        currentEntityType: type,
+        currentEditingId: entity ? entity.id : null
+    });
+    
+    let formHtml = '';
+    let title = '';
+
+    switch (type) {
+        case 'plan':
+            title = entity ? 'Sửa Kế hoạch' : 'Thêm Kế hoạch';
+            formHtml = getPlanFormHtml(entity);
+            break;
+        case 'supplier':
+            title = entity ? 'Sửa Nhà Cung Cấp' : 'Thêm NCC';
+            formHtml = getSupplierFormHtml(entity);
+            break;
+        case 'invoice':
+            title = entity ? 'Sửa Hóa đơn' : 'Thêm Hóa đơn';
+            formHtml = getInvoiceFormHtml(entity);
+            break;
+        case 'disbursement':
+            title = entity ? 'Sửa Giải Ngân' : 'Thêm Giải Ngân';
+            formHtml = getDisbursementFormHtml(entity);
+            break;
+
     }
 
-    // Bắt đầu chạy
-    displayPlans();
-});
+    DOM.modalTitle.textContent = title;
+    DOM.entityForm.innerHTML = formHtml;
+    DOM.modal.classList.remove('hidden');
+    setTimeout(() => DOM.modal.classList.add('visible'), 10);
+}
+
+export async function handleFormSubmit(event) {
+    event.preventDefault();
+    switch (state.currentEntityType) {
+        case 'plan':
+            await handlePlanSubmit(event.target);
+            break;
+        case 'supplier':
+            await handleSupplierSubmit(event.target);
+            break;
+        case 'invoice':
+            await handleInvoiceSubmit(event.target);
+            break;
+
+        case 'disbursement':
+            await handleDisbursementSubmit(event.target);
+            break;
+
+    }
+}
+============================================================
+
+============================================================
+FILE: static\js\ui\disbursementUI.js
+============================================================
+import { disbursementAPI } from '../api.js';
+import state, { setState } from '../state.js';
+import { formatCurrency, formatDate, closeModal } from './common.js';
+import { loadPlanDetails } from '../main.js';
+
+const tableContainer = document.getElementById('disbursements-table-container');
+
+function renderDisbursementsTable(disbursements) {
+    if (!disbursements || disbursements.length === 0) {
+        tableContainer.innerHTML = '<p>Chưa có lịch trả lãi nào. Hãy nhấn "Tạo Lịch Tự Động".</p>';
+        return;
+    }
+
+    const totalInterestAmount = disbursements.reduce((sum, d) => sum + parseFloat(d.interest_amount || 0), 0);
+
+    let tableHtml = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Ngày đến hạn trả lãi</th>
+                    <th>Số tiền lãi</th>
+                    <th>Ngày thực trả</th>
+                    <th class="actions">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    disbursements.sort((a,b) => new Date(a.interest_due_date) - new Date(b.interest_due_date)).forEach(d => {
+        tableHtml += `
+            <tr data-id="${d.id}" data-type="disbursement">
+                <td>${formatDate(d.interest_due_date)}</td>
+                <td>${formatCurrency(d.interest_amount)}</td>
+                <td>${formatDate(d.actual_date)}</td>
+                <td class="actions">
+                    <button class="icon-btn edit-btn" title="Cập nhật trả lãi"><span class="material-icons">edit</span></button>
+                    <button class="icon-btn delete-btn" title="Xóa"><span class="material-icons">delete</span></button>
+                </td>
+            </tr>`;
+    });
+    
+    tableHtml += `</tbody>
+        <tfoot>
+            <tr style="font-weight: bold; background-color: #f5f5f5;">
+                <td style="text-align: right;">Tổng lãi đã trả:</td>
+                <td>${formatCurrency(totalInterestAmount)}</td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>`;
+    tableContainer.innerHTML = tableHtml;
+}
+
+export async function loadDisbursements(planId) {
+    tableContainer.innerHTML = '<p>Đang tải lịch trả lãi...</p>';
+    try {
+        const disbursements = await disbursementAPI.getByPlanId(planId);
+        renderDisbursementsTable(disbursements);
+    } catch (e) {
+        tableContainer.innerHTML = `<p style="color: red;">Lỗi tải lịch trả lãi: ${e.message}</p>`;
+    }
+}
+
+// Hàm tạo HTML cho form
+export function getDisbursementFormHtml(d) {
+    return `
+        <input type="hidden" name="plan_id" value="${d ? d.plan_id : state.selectedPlan.id}">
+        
+        <div class="form-group">
+            <label>Ngày đến hạn trả lãi *</label>
+            <input type="date" name="interest_due_date" required value="${d?.interest_due_date || ''}">
+        </div>
+        <div class="form-group">
+            <label>Số tiền lãi</label>
+            <input type="number" step="any" name="interest_amount" placeholder="Để trống nếu chưa có" value="${d?.interest_amount || ''}">
+        </div>
+        <div class="form-group">
+            <label>Ngày thực trả</label>
+            <input type="date" name="actual_date" value="${d?.actual_date || ''}">
+        </div>
+
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Lưu</button></div>
+    `;
+}
+
+// Hàm xử lý submit form
+export async function handleDisbursementSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const id = state.currentEditingId;
+
+    // Chuyển đổi các trường số và null nếu rỗng
+    const fieldsToConvert = ['interest_amount'];
+    for (const key of fieldsToConvert) {
+        if (data[key] === '' || data[key] === null) {
+            data[key] = null;
+        } else {
+            data[key] = Number(data[key]);
+        }
+    }
+    // Chuyển đổi ngày rỗng
+    const dateFields = ['interest_due_date', 'actual_date'];
+    for (const key of dateFields) {
+        if (data[key] === '') {
+            data[key] = null;
+        }
+    }
+
+    try {
+        if (id) {
+            // Khi cập nhật, chỉ gửi các trường được phép trong schema Update
+            const updateData = {
+                interest_due_date: data.interest_due_date,
+                interest_amount: data.interest_amount,
+                actual_date: data.actual_date
+            };
+            await disbursementAPI.update(id, updateData);
+        } else {
+            await disbursementAPI.create(data);
+        }
+        closeModal();
+        loadPlanDetails(state.selectedPlan.id);
+    } catch (error) {
+        alert(`Lỗi: ${error.message}`);
+    }
+}
+============================================================
+
+============================================================
+FILE: static\js\ui\invoiceUI.js
+============================================================
+// File: static/js/ui/invoiceUI.js
+// Logic UI cho Hóa đơn
+
+import { invoiceAPI } from '../api.js';
+import state, { setState } from '../state.js';
+import { formatCurrency, formatDate, closeModal } from './common.js';
+import { loadPlanDetails } from '../main.js'; // Import hàm load chính
+
+const tableContainer = document.getElementById('invoices-table-container');
+
+function renderInvoicesTable() {
+    const { allInvoices, currentPage, invoicesPerPage } = state.invoicePagination;
+
+    if (!allInvoices || allInvoices.length === 0) {
+        tableContainer.innerHTML = '<p>Chưa có hóa đơn nào cho kế hoạch này.</p>';
+        return;
+    }
+    
+    const totalValue = allInvoices.reduce((sum, inv) => sum + parseFloat(inv.total_value || 0), 0);
+    const totalPages = Math.ceil(allInvoices.length / invoicesPerPage);
+    const paginatedInvoices = allInvoices.slice((currentPage - 1) * invoicesPerPage, currentPage * invoicesPerPage);
+    
+    // Nút phân trang được tạo dưới dạng chuỗi HTML để dễ dàng gán sự kiện sau này
+    const paginationControls = totalPages > 1 ? `
+        <div class="pagination" style="margin-top: 16px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 16px;">
+            <button class="btn btn-secondary pagination-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>Trước</button>
+            <span style="font-weight: 500;">Trang ${currentPage} / ${totalPages}</span>
+            <button class="btn btn-secondary pagination-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Sau</button>
+        </div>` : '';
+
+    tableContainer.innerHTML = `
+        <table>
+            <thead><tr><th>Số HĐ</th><th>Ngày HĐ</th><th>NCC</th><th>Giá trị</th><th class="actions">Hành động</th></tr></thead>
+            <tbody>
+            ${paginatedInvoices.map(inv => `
+                <tr data-id="${inv.id}" data-type="invoice">
+                    <td>${inv.invoice_number}</td><td>${formatDate(inv.issue_date)}</td>
+                    <td>${inv.supplier?.name || 'N/A'}</td><td>${formatCurrency(inv.total_value)}</td>
+                    <td class="actions">
+                        <button class="icon-btn edit-btn" title="Sửa"><span class="material-icons">edit</span></button>
+                        <button class="icon-btn delete-btn" title="Xóa"><span class="material-icons">delete</span></button>
+                    </td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background-color: #f5f5f5;">
+                    <td colspan="3" style="text-align: right;">Tổng cộng:</td>
+                    <td>${formatCurrency(totalValue)}</td><td></td>
+                </tr>
+            </tfoot>
+        </table>
+        ${paginationControls}`;
+}
+
+export function changeInvoicePage(newPage) {
+    const { allInvoices, invoicesPerPage } = state.invoicePagination;
+    const totalPages = Math.ceil(allInvoices.length / invoicesPerPage);
+    if (newPage >= 1 && newPage <= totalPages) {
+        setState({ invoicePagination: { ...state.invoicePagination, currentPage: newPage } });
+        renderInvoicesTable();
+    }
+}
+
+export async function loadInvoices(planId) {
+    tableContainer.innerHTML = '<p>Đang tải hóa đơn...</p>';
+    try {
+        const invoices = await invoiceAPI.getByPlanId(planId);
+        setState({ invoicePagination: { ...state.invoicePagination, allInvoices: invoices, currentPage: 1 } });
+        renderInvoicesTable();
+    } catch (e) {
+        tableContainer.innerHTML = `<p style="color: red;">Lỗi tải hóa đơn: ${e.message}</p>`;
+    }
+}
+
+export function getInvoiceFormHtml(inv) {
+    const supplierOptions = state.suppliersCache.map(s => 
+        `<option value="${s.id}" ${inv && inv.supplier_id === s.id ? 'selected' : ''}>${s.name}</option>`
+    ).join('');
+
+    return `
+        <input type="hidden" name="plan_id" value="${state.selectedPlan.id}">
+        <div class="form-group"><label>Số hóa đơn *</label><input type="text" name="invoice_number" required value="${inv ? inv.invoice_number : ''}"></div>
+        <div class="form-group"><label>Ngày hóa đơn *</label><input type="date" name="issue_date" required value="${inv ? inv.issue_date : ''}"></div>
+        <div class="form-group"><label>Giá trị *</label><input type="number" step="any" name="total_value" required value="${inv ? inv.total_value : ''}"></div>
+        <div class="form-group"><label>Nhà cung cấp *</label><select name="supplier_id" required>${supplierOptions}</select></div>
+        <div class="form-group"><label>Trạng thái</label>
+            <select name="status">
+                <option value="Chưa thanh toán" ${inv && inv.status === 'Chưa thanh toán' ? 'selected' : ''}>Chưa thanh toán</option>
+                <option value="Đã thanh toán" ${inv && inv.status === 'Đã thanh toán' ? 'selected' : ''}>Đã thanh toán</option>
+            </select>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Lưu</button></div>
+    `;
+}
+
+export async function handleInvoiceSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const id = state.currentEditingId;
+
+    try {
+        if (id) {
+            await invoiceAPI.update(id, data);
+        } else {
+            await invoiceAPI.create(data);
+        }
+        closeModal();
+        loadPlanDetails(state.selectedPlan.id); // Tải lại toàn bộ chi tiết kế hoạch
+    } catch (error) {
+        alert(`Lỗi: ${error.message}`);
+    }
+}
+============================================================
+
+============================================================
+FILE: static\js\ui\planUI.js
+============================================================
+import { planAPI } from '../api.js';
+import { closeModal } from './common.js';
+
+const tableContainer = document.getElementById('plans-table-container');
+
+function renderPlansTable(plans) {
+    if (!plans || plans.length === 0) {
+        tableContainer.innerHTML = '<p>Chưa có kế hoạch nào.</p>';
+        return;
+    }
+    tableContainer.innerHTML = `
+        <table>
+            <thead><tr><th>Tên Kế hoạch</th><th>Mô tả</th><th class="actions">Hành động</th></tr></thead>
+            <tbody>
+                ${plans.map(p => `
+                    <tr data-id="${p.id}" data-type="plan">
+                        <td><a href="#" class="view-details-link">${p.name}</a></td>
+                        <td>${p.description || ''}</td>
+                        <td class="actions">
+                            <button class="icon-btn edit-btn" title="Sửa"><span class="material-icons">edit</span></button>
+                            <button class="icon-btn delete-btn" title="Xóa"><span class="material-icons">delete</span></button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>`;
+}
+
+export async function loadPlans() {
+    tableContainer.innerHTML = '<p>Đang tải...</p>';
+    try {
+        const plans = await planAPI.getAll();
+        renderPlansTable(plans);
+    } catch (e) {
+        tableContainer.innerHTML = `<p style="color: red;">Lỗi tải kế hoạch: ${e.message}</p>`;
+    }
+}
+
+
+export function getPlanFormHtml(p) {
+    return `
+        <div class="form-group"><label>Tên Kế hoạch *</label><input type="text" name="name" required value="${p ? p.name : ''}"></div>
+        <div class="form-group"><label>Mô tả</label><textarea name="description" rows="3">${p ? p.description || '' : ''}</textarea></div>
+        <div class="form-group"><label>Ngày trả lãi định kỳ *</label><input type="number" name="periodic_interest_day" required min="1" max="31" value="${p ? p.periodic_interest_day : '25'}"></div>
+        
+        <hr>
+        <h4>Thông tin Khoản vay</h4>
+        <div class="form-group"><label>Ngày thực tế vay</label><input type="date" name="actual_date" value="${p ? p.actual_date || '' : ''}"></div>
+        <div class="form-group"><label>Ngày đáo hạn (trả gốc)</label><input type="date" name="principal_due_date" value="${p ? p.principal_due_date || '' : ''}"></div>
+        <div class="form-group"><label>Ngân hàng</label><input type="text" name="bank_name" value="${p ? p.bank_name || '' : ''}"></div>
+        <div class="form-group"><label>Số HĐ Tín dụng</label><input type="text" name="loan_contract_number" value="${p ? p.loan_contract_number || '' : ''}"></div>
+
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Lưu</button></div>
+    `;
+}
+
+export async function handlePlanSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        if (data.id) {
+            await planAPI.update(data.id, data);
+        } else {
+            await planAPI.create(data);
+        }
+        closeModal();
+        loadPlans();
+    } catch (error) {
+        alert(`Lỗi: ${error.message}`);
+    }
+}
+============================================================
+
+============================================================
+FILE: static\js\ui\supplierUI.js
+============================================================
+import { supplierAPI } from '../api.js';
+import { closeModal } from './common.js';
+import state, { setState } from '../state.js';
+
+const tableContainer = document.getElementById('suppliers-table-container');
+
+function renderSuppliersTable(suppliers) {
+    if (!suppliers || suppliers.length === 0) {
+        tableContainer.innerHTML = '<p>Chưa có nhà cung cấp nào.</p>';
+        return;
+    }
+    tableContainer.innerHTML = `
+        <table>
+            <thead><tr><th>Tên NCC</th><th>Liên hệ</th><th class="actions">Hành động</th></tr></thead>
+            <tbody>
+                ${suppliers.map(s => `
+                    <tr data-id="${s.id}" data-type="supplier">
+                        <td>${s.name}</td>
+                        <td>${s.contact_info || ''}</td>
+                        <td class="actions">
+                            <button class="icon-btn edit-btn" title="Sửa"><span class="material-icons">edit</span></button>
+                            <button class="icon-btn delete-btn" title="Xóa"><span class="material-icons">delete</span></button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>`;
+}
+
+export async function loadSuppliers() {
+    tableContainer.innerHTML = '<p>Đang tải...</p>';
+    try {
+        const suppliers = await supplierAPI.getAll();
+        renderSuppliersTable(suppliers);
+    } catch (e) {
+        tableContainer.innerHTML = `<p style="color: red;">Lỗi tải NCC: ${e.message}</p>`;
+    }
+}
+
+export async function loadSuppliersCache() {
+    try {
+        const suppliers = await supplierAPI.getAll();
+        setState({ suppliersCache: suppliers });
+    } catch(e) { 
+        console.error("Lỗi tải cache NCC:", e); 
+    }
+}
+
+export function getSupplierFormHtml(s) {
+    return `
+        <div class="form-group"><label>Tên NCC *</label><input type="text" name="name" required value="${s ? s.name : ''}"></div>
+        <div class="form-group"><label>Liên hệ</label><textarea name="contact_info" rows="3">${s ? s.contact_info || '' : ''}</textarea></div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Lưu</button></div>
+    `;
+}
+
+export async function handleSupplierSubmit(form) {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const id = state.currentEditingId;
+
+    try {
+        if (id) {
+            await supplierAPI.update(id, data);
+        } else {
+            await supplierAPI.create(data);
+        }
+        closeModal();
+        loadSuppliers();
+        loadSuppliersCache(); // Cập nhật lại cache
+    } catch (error) {
+        alert(`Lỗi: ${error.message}`);
+    }
+}
 ============================================================
 
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 29
-File code: 26
+Tổng số file: 36
+File code: 33
 Các loại file code:
   .css: 1 file
-  .js: 1 file
+  .js: 8 file
   .md: 1 file
   .py: 21 file
   .txt: 2 file

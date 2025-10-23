@@ -1,106 +1,162 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const plansContainer = document.getElementById('plans-container');
-    const detailsSection = document.getElementById('details-section');
-    const invoicesContainer = document.getElementById('invoices-container');
-    const disbursementsContainer = document.getElementById('disbursements-container');
-    const planNameSpan = document.getElementById('plan-name');
+import state, { setState } from './state.js';
+import { planAPI, supplierAPI, invoiceAPI, disbursementAPI } from './api.js';
+import { DOM, showMainListView, showPlanDetailsView, showTabInMainView, openModal, closeModal, handleFormSubmit } from './ui/common.js';
+import { loadPlans } from './ui/planUI.js';
+import { loadSuppliers, loadSuppliersCache } from './ui/supplierUI.js';
+import { loadInvoices, changeInvoicePage } from './ui/invoiceUI.js';
+import { loadDisbursements } from './ui/disbursementUI.js';
+
+// --- MAIN FUNCTION TO LOAD PLAN DETAILS ---
+export async function loadPlanDetails(planId) {
+    showPlanDetailsView();
+    const planDetailsTitle = document.getElementById('plan-details-title');
+    const planDetailsDescription = document.getElementById('plan-details-description');
     
-    const formatCurrency = (value) => value != null ? new Intl.NumberFormat('vi-VN').format(value) : 'N/A';
-    const formatDate = (value) => value ? new Date(value).toLocaleDateString('vi-VN') : 'N/A';
+    planDetailsTitle.textContent = "Đang tải chi tiết kế hoạch...";
+    planDetailsDescription.textContent = "";
 
-    // 1. Hiển thị danh sách các Kế hoạch
-    async function displayPlans() {
-        try {
-            const response = await fetch('/api/v1/plans');
-            const plans = await response.json();
-            let html = '<ul>';
-            plans.forEach(plan => {
-                html += `<li><a href="#" class="plan-link" data-id="${plan.id}" data-name="${plan.name}">${plan.name}</a></li>`;
-            });
-            html += '</ul>';
-            plansContainer.innerHTML = html;
-
-            document.querySelectorAll('.plan-link').forEach(link => {
-                link.addEventListener('click', handlePlanClick);
-            });
-        } catch (error) {
-            plansContainer.innerHTML = '<p style="color:red;">Lỗi tải danh sách kế hoạch.</p>';
-        }
-    }
-
-    // 2. Xử lý khi click vào một Kế hoạch
-    async function handlePlanClick(event) {
-        event.preventDefault();
-        const planId = event.target.dataset.id;
-        const planName = event.target.dataset.name;
+    try {
+        const planData = await planAPI.getById(planId);
+        setState({ selectedPlan: planData });
         
-        planNameSpan.textContent = planName;
-        detailsSection.style.display = 'block';
-        invoicesContainer.innerHTML = '<p>Đang tải hóa đơn...</p>';
-        disbursementsContainer.innerHTML = '<p>Đang tải chi tiết giải ngân...</p>';
+        planDetailsTitle.textContent = `Chi tiết cho Kế hoạch: ${planData.name}`;
+        planDetailsDescription.textContent = planData.description || '';
         
-        // Gọi cả hai hàm để tải dữ liệu song song
+        // Tải hóa đơn và giải ngân song song
         await Promise.all([
-            displayInvoices(planId),
-            displayDisbursements(planId)
+            loadInvoices(planId),
+            loadDisbursements(planId)
         ]);
+
+    } catch (e) {
+        planDetailsTitle.textContent = "Lỗi tải chi tiết kế hoạch";
+        console.error(e);
     }
+}
 
-    // 3. Hiển thị Hóa đơn cho một Kế hoạch
-    async function displayInvoices(planId) {
-        const response = await fetch(`/api/v1/invoices/plan/${planId}`);
-        const invoices = await response.json();
+// --- EVENT LISTENERS ---
+function setupEventListeners() {
+    // Navigation
+    DOM.navPlans.addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('plan-management-view');
+        loadPlans();
+    });
 
-        if (invoices.length === 0) {
-            invoicesContainer.innerHTML = '<p>Kế hoạch này chưa có hóa đơn.</p>';
-            return;
+    DOM.navSuppliers.addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('supplier-management-view');
+        loadSuppliers();
+    });
+
+    document.getElementById('back-to-list-btn').addEventListener('click', () => {
+        showMainListView();
+        showTabInMainView('plan-management-view');
+        loadPlans();
+    });
+
+    // Add buttons
+    document.getElementById('add-plan-btn').addEventListener('click', () => openModal('plan'));
+    document.getElementById('add-supplier-btn').addEventListener('click', () => openModal('supplier'));
+    document.getElementById('add-invoice-btn').addEventListener('click', () => openModal('invoice'));
+    document.getElementById('add-disbursement-btn').addEventListener('click', () => openModal('disbursement'));
+
+    // Modal
+    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+    DOM.modal.addEventListener('click', e => { if(e.target === DOM.modal) closeModal(); });
+    DOM.entityForm.addEventListener('submit', handleFormSubmit);
+
+    document.getElementById('generate-schedule-btn-auto').addEventListener('click', async () => {
+        if (!state.selectedPlan || !state.selectedPlan.id) return;
+        const plan = state.selectedPlan;
+        if (confirm(`Tạo/Cập nhật lịch trả lãi cho kế hoạch "${plan.name}"? Lịch cũ (nếu có) sẽ bị xóa.`)) {
+            try {
+                const result = await planAPI.generateSchedule(plan.id);
+                alert(result.message);
+                loadPlanDetails(plan.id);
+            } catch (e) { alert(`Lỗi: ${e.message}`); }
         }
+    });
 
-        let table = `<table><thead><tr><th>Số HĐ</th><th>Ngày HĐ</th><th>NCC</th><th>Giá trị</th><th>Trạng thái</th></tr></thead><tbody>`;
-        invoices.forEach(inv => {
-            table += `<tr>
-                <td>${inv.invoice_number}</td>
-                <td>${formatDate(inv.issue_date)}</td>
-                <td>${inv.suppliers ? inv.suppliers.name : 'N/A'}</td>
-                <td>${formatCurrency(inv.total_value)}</td>
-                <td>${inv.status}</td>
-            </tr>`;
-        });
-        table += '</tbody></table>';
-        invoicesContainer.innerHTML = table;
-    }
-
-    // 4. Hiển thị các Lần Giải ngân cho một Kế hoạch
-    async function displayDisbursements(planId) {
-        const response = await fetch(`/api/v1/disbursements/plan/${planId}`);
-        const disbursements = await response.json();
-
-        if (disbursements.length === 0) {
-            disbursementsContainer.innerHTML = '<p>Kế hoạch này chưa có lần giải ngân nào.</p>';
-            return;
+    document.getElementById('delete-schedule-btn-auto').addEventListener('click', async () => {
+        if (!state.selectedPlan || !state.selectedPlan.id) return;
+        const plan = state.selectedPlan;
+        if (confirm(`Xóa toàn bộ lịch trả lãi của kế hoạch "${plan.name}"?`)) {
+            try {
+                const result = await planAPI.deleteSchedule(plan.id);
+                alert(result.message);
+                loadPlanDetails(plan.id);
+            } catch (e) { alert(`Lỗi: ${e.message}`); }
         }
+    });
+
+
+    // Delegated events for tables
+    document.body.addEventListener('click', async (event) => {
+        const target = event.target;
         
-        let cumulativeAmount = 0;
-        let table = `<table><thead><tr>
-            <th>Ngày GN thực tế</th><th>Giá trị GN</th><th>Lũy kế</th><th>Ngân hàng</th><th>Số khế ước</th><th>Lãi suất</th><th>Ngày đáo hạn</th>
-        </tr></thead><tbody>`;
+        // View plan details
+        if (target.matches('.view-details-link')) {
+            event.preventDefault();
+            loadPlanDetails(target.closest('tr').dataset.id);
+        }
 
-        disbursements.forEach(d => {
-            cumulativeAmount += d.actual_amount || 0;
-            table += `<tr>
-                <td>${formatDate(d.actual_date)}</td>
-                <td>${formatCurrency(d.actual_amount)}</td>
-                <td>${formatCurrency(cumulativeAmount)}</td>
-                <td>${d.bank_name || 'N/A'}</td>
-                <td>${d.loan_contract_number || 'N/A'}</td>
-                <td>${d.loan_interest_rate ? (d.loan_interest_rate * 100).toFixed(2) + '%' : 'N/A'}</td>
-                <td>${formatDate(d.principal_due_date)}</td>
-            </tr>`;
-        });
-        table += '</tbody></table>';
-        disbursementsContainer.innerHTML = table;
-    }
+        // Pagination for invoices
+        const paginationBtn = target.closest('.pagination-btn');
+        if (paginationBtn) {
+            changeInvoicePage(parseInt(paginationBtn.dataset.page));
+        }
 
-    // Bắt đầu chạy
-    displayPlans();
+        // Generic Edit/Delete buttons
+        const iconBtn = target.closest('.icon-btn');
+        if (iconBtn) {
+            const row = iconBtn.closest('tr');
+            if(!row) return;
+
+            const id = row.dataset.id;
+            const type = row.dataset.type;
+
+            if (iconBtn.classList.contains('edit-btn')) {
+                try {
+                    let data;
+                    if (type === 'plan') data = await planAPI.getById(id);
+                    else if (type === 'supplier') data = await supplierAPI.getById(id);
+                    else if (type === 'invoice') data = await invoiceAPI.getById(id);
+                    else if (type === 'disbursement') data = await disbursementAPI.getById(id);
+                    
+                    if(data) openModal(type, data);
+
+                } catch(e) { alert(e.message); }
+            }
+            
+            if (iconBtn.classList.contains('delete-btn')) {
+                if (confirm(`Bạn chắc chắn muốn xóa mục (ID: ${id}) này?`)) {
+                    try {
+                        if (type === 'plan') await planAPI.delete(id);
+                        else if (type === 'supplier') { await supplierAPI.delete(id); loadSuppliersCache(); }
+                        else if (type === 'invoice') await invoiceAPI.delete(id);
+                        else if (type === 'disbursement') await disbursementAPI.delete(id);
+                        
+                        // Reload relevant data
+                        if (type === 'plan' || type === 'supplier') {
+                             loadPlans();
+                             loadSuppliers();
+                        }
+                        else if (type === 'invoice' || type === 'disbursement') {
+                            loadPlanDetails(state.selectedPlan.id);
+                        }
+
+                    } catch(e) { alert(e.message); }
+                }
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupEventListeners();
+    showMainListView();
+    showTabInMainView('plan-management-view');
+    loadPlans();
+    loadSuppliersCache();
 });

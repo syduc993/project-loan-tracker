@@ -1,6 +1,9 @@
+# File: src/routes/pages.py (ĐÃ SỬA LỖI)
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from src.core.app import templates
+# Sửa dòng import này: thay vì từ src.core.app, hãy import từ file mới
+from src.core.templating import templates
 
 router = APIRouter()
 

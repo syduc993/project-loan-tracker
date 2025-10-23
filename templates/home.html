@@ -1,27 +1,101 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Loan Tracker</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="app-bar">
+        <div class="app-bar-title">Project Loan Tracker</div>
+        <nav class="navbar">
+            <button id="nav-plans" class="nav-btn active">
+                <span class="material-icons">description</span> Quản lý Kế hoạch
+            </button>
+            <button id="nav-suppliers" class="nav-btn">
+                <span class="material-icons">business</span> Quản lý Nhà Cung Cấp
+            </button>
+        </nav>
+    </header>
 
-{% block content %}
-<section>
-    <h2>Danh sách Kế hoạch Giải ngân</h2>
-    <div id="plans-container">
-        <p>Đang tải dữ liệu...</p>
+    <main class="main-container">
+        <!-- ====================================================== -->
+        <!-- VIEW DANH SÁCH CHÍNH (KẾ HOẠCH & NCC) -->
+        <!-- ====================================================== -->
+        <div id="main-list-view">
+            <!-- Tab Kế hoạch -->
+            <div id="plan-management-view" class="management-view active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><span class="material-icons">description</span> Danh sách Kế hoạch Giải ngân</h2>
+                        <button id="add-plan-btn" class="btn btn-primary"><span class="material-icons">add</span> Thêm Kế hoạch</button>
+                    </div>
+                    <div id="plans-table-container"></div>
+                </div>
+            </div>
+
+            <!-- Tab Nhà cung cấp -->
+            <div id="supplier-management-view" class="management-view">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><span class="material-icons">business</span> Danh sách Nhà Cung Cấp</h2>
+                        <button id="add-supplier-btn" class="btn btn-primary"><span class="material-icons">add</span> Thêm NCC</button>
+                    </div>
+                    <div id="suppliers-table-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- VIEW CHI TIẾT KẾ HOẠCH -->
+        <!-- ====================================================== -->
+        <div id="plan-details-view" style="display: none;">
+            <button id="back-to-list-btn" class="btn btn-secondary" style="margin-bottom: 16px;"><span class="material-icons">arrow_back</span> QUAY LẠI DANH SÁCH</button>
+            <h1 id="plan-details-title">Chi tiết cho Kế hoạch...</h1>
+            <p id="plan-details-description"></p>
+
+            <!-- Danh sách Hóa đơn -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="material-icons">receipt_long</span> Danh sách Hóa đơn</h2>
+                    <button id="add-invoice-btn" class="btn btn-primary"><span class="material-icons">add</span> Thêm Hóa đơn</button>
+                </div>
+                <div id="invoices-table-container"></div>
+            </div>
+
+            <!-- Lịch sử giải ngân -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="material-icons">history</span> Lịch sử Giải ngân (Lịch trả lãi)</h2>
+                    <div>
+                        <button class="btn" id="generate-schedule-btn-auto" style="background-color: #ffc107;"><span class="material-icons">auto_awesome</span> TẠO LỊCH TỰ ĐỘNG</button>
+                        <button class="btn" id="delete-schedule-btn-auto" style="background-color: #f44336; color: white;"><span class="material-icons">delete_sweep</span> XOÁ LỊCH</button>
+                        <button class="btn btn-primary" id="add-disbursement-btn"><span class="material-icons">add</span> THÊM (THỦ CÔNG)</button>
+                    </div>
+                </div>
+                <div id="disbursements-table-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ====================================================== -->
+    <!-- MODAL (POP-UP) ĐỂ THÊM/SỬA -->
+    <!-- ====================================================== -->
+    <div id="entity-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button id="close-modal-btn" class="icon-btn"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="entity-form"></form>
+            </div>
+        </div>
     </div>
-</section>
 
-<!-- Vùng hiển thị chi tiết khi một kế hoạch được chọn -->
-<section id="details-section" style="display:none;">
-    <h2 id="plan-title">Chi tiết cho Kế hoạch: <span id="plan-name"></span></h2>
-    
-    <hr>
-    <h3>Danh sách Hóa đơn liên quan</h3>
-    <div id="invoices-container"></div>
-    
-    <hr>
-    <h3>Danh sách các Lần Giải ngân</h3>
-    <div id="disbursements-container"></div>
-</section>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
-{% endblock %}
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>

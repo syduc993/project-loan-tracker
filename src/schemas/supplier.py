@@ -7,6 +7,10 @@ class SupplierBase(BaseModel):
 class SupplierCreate(SupplierBase):
     pass
 
+class SupplierUpdate(BaseModel):
+    name: str | None = None
+    contact_info: str | None = None
+
 class SupplierResponse(SupplierBase):
     id: int
 
