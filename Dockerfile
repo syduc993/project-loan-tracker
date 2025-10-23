@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "src.core.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+CMD uvicorn src.core.app:app --host 0.0.0.0 --port $PORT --proxy-headers
