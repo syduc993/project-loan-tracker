@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-10-23 16:48:14
+Thời gian tạo: 2025-10-23 17:36:14
 Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ================================================================================
 
@@ -60,12 +60,12 @@ Thư mục gốc: d:\Atino\extension\project-loan-tracker
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
-Dockerfile (213 bytes)
+Dockerfile (217 bytes)
 Get detail code.ipynb (9476 bytes)
 main.py (151 bytes)
 project_complete_info.txt (0 bytes)
 README.md (1692 bytes)
-requirements.txt (88 bytes)
+requirements.txt (130 bytes)
 src\core\app.py (1146 bytes)
 src\core\config.py (210 bytes)
 src\core\templating.py (347 bytes)
@@ -79,7 +79,7 @@ src\schemas\disbursement.py (2137 bytes)
 src\schemas\disbursement_plan.py (1036 bytes)
 src\schemas\invoice.py (2150 bytes)
 src\schemas\supplier.py (374 bytes)
-src\services\database\base.py (1820 bytes)
+src\services\database\base.py (1901 bytes)
 src\services\database\disbursement.py (7150 bytes)
 src\services\database\disbursement_plan.py (1557 bytes)
 src\services\database\invoice.py (2062 bytes)
@@ -180,12 +180,12 @@ CREATE TABLE disbursements (
 ============================================================
 FILE: requirements.txt
 ============================================================
-fastapi
-uvicorn[standard]
-pydantic-settings
-jinja2
-sqlalchemy[asyncio]>=2.0
-asyncpg
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic-settings==2.0.3
+jinja2==3.1.2
+sqlalchemy[asyncio]==2.0.23
+asyncpg==0.27.0
 ============================================================
 
 ============================================================
@@ -772,7 +772,9 @@ Base = declarative_base()
 # --- BẮT ĐẦU PHẦN SỬA LỖI ---
 
 # 1. Lấy URL từ file config ra một biến tạm
-db_url = settings.DATABASE_URL
+#db_url = settings.DATABASE_URL
+
+db_url = "postgresql://postgres.sxhpsfboyzsuvjcvvqty:atino2025@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
 
 # 2. Kiểm tra xem biến DATABASE_URL có được thiết lập hay không
 if not db_url:
@@ -783,7 +785,6 @@ if db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     logger.info("Chuỗi kết nối đã được tự động cấu hình để sử dụng driver asyncpg.")
 
-# --- KẾT THÚC PHẦN SỬA LỖI ---
 
 
 # Tạo async engine với chuỗi kết nối đã được xử lý
