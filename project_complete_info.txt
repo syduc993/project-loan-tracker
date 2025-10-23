@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-10-23 15:54:42
+Thời gian tạo: 2025-10-23 16:48:14
 Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ================================================================================
 
@@ -50,6 +50,7 @@ Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ├── 📁 templates/
 │   ├── 📄 base.html
 │   └── 📄 home.html
+├── 📄 Dockerfile
 ├── 📄 Get detail code.ipynb
 ├── 📄 main.py
 ├── 📄 project_complete_info.txt
@@ -59,6 +60,7 @@ Thư mục gốc: d:\Atino\extension\project-loan-tracker
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
+Dockerfile (213 bytes)
 Get detail code.ipynb (9476 bytes)
 main.py (151 bytes)
 project_complete_info.txt (0 bytes)
@@ -85,7 +87,7 @@ src\services\database\schema.py (2879 bytes)
 src\services\database\supplier.py (1409 bytes)
 src\utils\interest_calculator.py (3692 bytes)
 static\css\style.css (5784 bytes)
-static\js\api.js (2320 bytes)
+static\js\api.js (2299 bytes)
 static\js\main.js (6790 bytes)
 static\js\state.js (405 bytes)
 static\js\ui\common.js (4090 bytes)
@@ -96,7 +98,7 @@ static\js\ui\supplierUI.js (2797 bytes)
 templates\base.html (2243 bytes)
 templates\home.html (5153 bytes)
 
-Tổng cộng: 36 file
+Tổng cộng: 37 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
@@ -1617,7 +1619,7 @@ FILE: static\js\api.js
 ============================================================
 async function fetchAPI(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
-    const response = await fetch(`/api/v1${endpoint}`, { ...options, headers });
+    const response = await fetch(`/api/v1/${endpoint}`, { ...options, headers });
     if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Có lỗi xảy ra');
@@ -1627,37 +1629,37 @@ async function fetchAPI(endpoint, options = {}) {
 }
 
 export const planAPI = {
-    getAll: () => fetchAPI('/plans/'),
-    getById: (id) => fetchAPI(`/plans/${id}`),
-    create: (data) => fetchAPI('/plans/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id, data) => fetchAPI(`/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id) => fetchAPI(`/plans/${id}`, { method: 'DELETE' }),
-    generateSchedule: (planId) => fetchAPI(`/plans/${planId}/generate-interest-schedule`, { method: 'POST' }),
-    deleteSchedule: (planId) => fetchAPI(`/plans/${planId}/interest-schedule`, { method: 'DELETE' }),
+    getAll: () => fetchAPI('plans/'),
+    getById: (id) => fetchAPI(`plans/${id}`),
+    create: (data) => fetchAPI('plans/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`plans/${id}`, { method: 'DELETE' }),
+    generateSchedule: (planId) => fetchAPI(`plans/${planId}/generate-interest-schedule`, { method: 'POST' }),
+    deleteSchedule: (planId) => fetchAPI(`plans/${planId}/interest-schedule`, { method: 'DELETE' }),
 };
 
 export const supplierAPI = {
-    getAll: () => fetchAPI('/suppliers/'),
-    getById: (id) => fetchAPI(`/suppliers/${id}`),
-    create: (data) => fetchAPI('/suppliers/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id, data) => fetchAPI(`/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id) => fetchAPI(`/suppliers/${id}`, { method: 'DELETE' }),
+    getAll: () => fetchAPI('suppliers/'),
+    getById: (id) => fetchAPI(`suppliers/${id}`),
+    create: (data) => fetchAPI('suppliers/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`suppliers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`suppliers/${id}`, { method: 'DELETE' }),
 };
 
 export const invoiceAPI = {
-    getByPlanId: (planId) => fetchAPI(`/invoices/plan/${planId}`),
-    getById: (id) => fetchAPI(`/invoices/${id}`),
-    create: (data) => fetchAPI('/invoices/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id, data) => fetchAPI(`/invoices/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id) => fetchAPI(`/invoices/${id}`, { method: 'DELETE' }),
+    getByPlanId: (planId) => fetchAPI(`invoices/plan/${planId}`),
+    getById: (id) => fetchAPI(`invoices/${id}`),
+    create: (data) => fetchAPI('invoices/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`invoices/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`invoices/${id}`, { method: 'DELETE' }),
 };
 
 export const disbursementAPI = {
-    getByPlanId: (planId) => fetchAPI(`/disbursements/plan/${planId}`),
-    getById: (id) => fetchAPI(`/disbursements/${id}`),
-    create: (data) => fetchAPI('/disbursements/', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id, data) => fetchAPI(`/disbursements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    delete: (id) => fetchAPI(`/disbursements/${id}`, { method: 'DELETE' }),
+    getByPlanId: (planId) => fetchAPI(`disbursements/plan/${planId}`),
+    getById: (id) => fetchAPI(`disbursements/${id}`),
+    create: (data) => fetchAPI('disbursements/', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => fetchAPI(`disbursements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => fetchAPI(`disbursements/${id}`, { method: 'DELETE' }),
 };
 ============================================================
 
@@ -2391,7 +2393,7 @@ export async function handleSupplierSubmit(form) {
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 36
+Tổng số file: 37
 File code: 33
 Các loại file code:
   .css: 1 file
