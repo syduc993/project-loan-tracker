@@ -1,6 +1,6 @@
-fastapi
-uvicorn[standard]
-pydantic-settings
-jinja2
-sqlalchemy[asyncio]>=2.0
-asyncpg
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic-settings==2.0.3
+jinja2==3.1.2
+sqlalchemy[asyncio]==2.0.23
+asyncpg==0.27.0

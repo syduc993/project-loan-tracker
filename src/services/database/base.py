@@ -11,7 +11,9 @@ Base = declarative_base()
 # --- BẮT ĐẦU PHẦN SỬA LỖI ---
 
 # 1. Lấy URL từ file config ra một biến tạm
-db_url = settings.DATABASE_URL
+#db_url = settings.DATABASE_URL
+
+db_url = "postgresql://postgres.sxhpsfboyzsuvjcvvqty:atino2025@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
 
 # 2. Kiểm tra xem biến DATABASE_URL có được thiết lập hay không
 if not db_url:
@@ -22,7 +24,6 @@ if db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     logger.info("Chuỗi kết nối đã được tự động cấu hình để sử dụng driver asyncpg.")
 
-# --- KẾT THÚC PHẦN SỬA LỖI ---
 
 
 # Tạo async engine với chuỗi kết nối đã được xử lý
