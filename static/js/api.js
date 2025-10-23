@@ -10,7 +10,7 @@ async function fetchAPI(endpoint, options = {}) {
 }
 
 export const planAPI = {
-    getAll: () => fetchAPI('plans/'),
+    getAll: () => fetchAPI('plans'),
     getById: (id) => fetchAPI(`plans/${id}`),
     create: (data) => fetchAPI('plans/', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => fetchAPI(`plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
