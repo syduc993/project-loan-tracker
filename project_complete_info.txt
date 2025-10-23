@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-10-23 13:56:17
+Thời gian tạo: 2025-10-23 15:54:42
 Thư mục gốc: d:\Atino\extension\project-loan-tracker
 ================================================================================
 
@@ -73,8 +73,8 @@ src\routes\invoices.py (2698 bytes)
 src\routes\pages.py (556 bytes)
 src\routes\suppliers.py (2489 bytes)
 src\schemas\__init__.py (0 bytes)
-src\schemas\disbursement.py (1989 bytes)
-src\schemas\disbursement_plan.py (668 bytes)
+src\schemas\disbursement.py (2137 bytes)
+src\schemas\disbursement_plan.py (1036 bytes)
 src\schemas\invoice.py (2150 bytes)
 src\schemas\supplier.py (374 bytes)
 src\services\database\base.py (1820 bytes)
@@ -91,7 +91,7 @@ static\js\state.js (405 bytes)
 static\js\ui\common.js (4090 bytes)
 static\js\ui\disbursementUI.js (4913 bytes)
 static\js\ui\invoiceUI.js (5810 bytes)
-static\js\ui\planUI.js (3324 bytes)
+static\js\ui\planUI.js (3881 bytes)
 static\js\ui\supplierUI.js (2797 bytes)
 templates\base.html (2243 bytes)
 templates\home.html (5153 bytes)
@@ -551,9 +551,11 @@ FILE: src\schemas\__init__.py
 ============================================================
 FILE: src\schemas\disbursement.py
 ============================================================
+# File: src/schemas/disbursement.py
+
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import date
+from datetime import date, datetime # <-- Thêm 'datetime' vào đây
 from decimal import Decimal
 
 
@@ -594,7 +596,8 @@ class DisbursementUpdate(BaseModel):
 
 class DisbursementResponse(DisbursementBase):
     id: int
-    created_at: date
+    # SỬA DÒNG NÀY: Chuyển từ 'date' sang 'datetime'
+    created_at: datetime 
 
     class Config:
         from_attributes = True
@@ -612,7 +615,6 @@ class GenerateInterestScheduleResponse(BaseModel):
     message: str
     schedules_created: int
     schedule_dates: list[date]
-
 ============================================================
 
 ============================================================
@@ -620,24 +622,29 @@ FILE: src\schemas\disbursement_plan.py
 ============================================================
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
-
+from datetime import datetime, date # Thêm 'date' vào đây
 
 class DisbursementPlanBase(BaseModel):
     name: str
     description: Optional[str] = None
     periodic_interest_day: int = Field(default=25, ge=1, le=31)
+    actual_date: Optional[date] = None
+    principal_due_date: Optional[date] = None
+    bank_name: Optional[str] = None
+    loan_contract_number: Optional[str] = None
 
 
 class DisbursementPlanCreate(DisbursementPlanBase):
     pass
 
-
 class DisbursementPlanUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     periodic_interest_day: Optional[int] = Field(None, ge=1, le=31)
-
+    actual_date: Optional[date] = None
+    principal_due_date: Optional[date] = None
+    bank_name: Optional[str] = None
+    loan_contract_number: Optional[str] = None
 
 class DisbursementPlanResponse(DisbursementPlanBase):
     id: int
@@ -645,7 +652,6 @@ class DisbursementPlanResponse(DisbursementPlanBase):
 
     class Config:
         from_attributes = True
-
 ============================================================
 
 ============================================================
@@ -2252,15 +2258,19 @@ export async function loadPlans() {
 
 
 export function getPlanFormHtml(p) {
+
+    const idInput = p ? `<input type="hidden" name="id" value="${p.id}">` : '';
+
     return `
+        ${idInput} 
         <div class="form-group"><label>Tên Kế hoạch *</label><input type="text" name="name" required value="${p ? p.name : ''}"></div>
         <div class="form-group"><label>Mô tả</label><textarea name="description" rows="3">${p ? p.description || '' : ''}</textarea></div>
         <div class="form-group"><label>Ngày trả lãi định kỳ *</label><input type="number" name="periodic_interest_day" required min="1" max="31" value="${p ? p.periodic_interest_day : '25'}"></div>
         
         <hr>
         <h4>Thông tin Khoản vay</h4>
-        <div class="form-group"><label>Ngày thực tế vay</label><input type="date" name="actual_date" value="${p ? p.actual_date || '' : ''}"></div>
-        <div class="form-group"><label>Ngày đáo hạn (trả gốc)</label><input type="date" name="principal_due_date" value="${p ? p.principal_due_date || '' : ''}"></div>
+        <div class="form-group"><label>Ngày thực tế vay</label><input type="date" name="actual_date" value="${p && p.actual_date ? p.actual_date : ''}"></div>
+        <div class="form-group"><label>Ngày đáo hạn (trả gốc)</label><input type="date" name="principal_due_date" value="${p && p.principal_due_date ? p.principal_due_date : ''}"></div>
         <div class="form-group"><label>Ngân hàng</label><input type="text" name="bank_name" value="${p ? p.bank_name || '' : ''}"></div>
         <div class="form-group"><label>Số HĐ Tín dụng</label><input type="text" name="loan_contract_number" value="${p ? p.loan_contract_number || '' : ''}"></div>
 
@@ -2272,10 +2282,23 @@ export async function handlePlanSubmit(form) {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     
+    // Lấy ID từ form data
+    const id = data.id;
+
+    // Chuyển đổi các trường date rỗng thành null để API không báo lỗi
+    const dateFields = ['actual_date', 'principal_due_date'];
+    dateFields.forEach(field => {
+        if (data[field] === '') {
+            data[field] = null;
+        }
+    });
+
     try {
-        if (data.id) {
-            await planAPI.update(data.id, data);
+        if (id) {
+            // Đã có id, gọi API update
+            await planAPI.update(id, data);
         } else {
+            // Không có id, gọi API create
             await planAPI.create(data);
         }
         closeModal();
